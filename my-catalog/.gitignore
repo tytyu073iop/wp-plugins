@@ -1,0 +1,4 @@
+node_modules/
+build/
+.wordpress-org/
+.DS_Store

@@ -1,0 +1,21 @@
+{
+  "name": "my-catalog",
+  "version": "0.1.0",
+  "description": "Hybrid WordPress plugin starter with classic PHP structure, block tooling, and wp-env support.",
+  "author": "Illia Biruk",
+  "license": "GPL-2.0-or-later",
+  "scripts": {
+    "start": "wp-scripts start --webpack-copy-php",
+    "build": "wp-scripts build --webpack-copy-php",
+    "lint:js": "wp-scripts lint-js src",
+    "lint:css": "wp-scripts lint-style src",
+    "format": "wp-scripts format",
+    "env:start": "wp-env start",
+    "env:stop": "wp-env stop",
+    "env:destroy": "wp-env destroy"
+  },
+  "devDependencies": {
+    "@wordpress/env": "^10.19.0",
+    "@wordpress/scripts": "^30.24.0"
+  }
+}
