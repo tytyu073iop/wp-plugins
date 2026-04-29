@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       My Catalog
  * Plugin URI:        https://example.com/my-catalog
- * Description:       A hybrid WordPress plugin starter with classic PHP structure, block tooling, and wp-env support.
- * Version:           0.1.0
+ * Description:       Catalog features for custom products and news, including a product table and news carousel shortcodes.
+ * Version:           0.2.0
  * Requires at least: 6.5
  * Requires PHP:      7.4
  * Author:            Illia Biruk
@@ -18,17 +18,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MY_CATALOG_VERSION', '0.1.0' );
+define( 'MY_CATALOG_VERSION', '0.2.0' );
 define( 'MY_CATALOG_FILE', __FILE__ );
 define( 'MY_CATALOG_PATH', plugin_dir_path( __FILE__ ) );
 define( 'MY_CATALOG_URL', plugin_dir_url( __FILE__ ) );
 
+require_once MY_CATALOG_PATH . 'includes/class-my-catalog-core.php';
+require_once MY_CATALOG_PATH . 'includes/class-my-catalog-product-table.php';
+require_once MY_CATALOG_PATH . 'includes/class-my-catalog-news-carousel.php';
 require_once MY_CATALOG_PATH . 'includes/class-my-catalog-plugin.php';
 
 /**
  * Runs on plugin activation.
  */
 function my_catalog_activate() {
+	My_Catalog_Core::register_content_types();
+
 	if ( ! get_option( 'my_catalog_version' ) ) {
 		add_option( 'my_catalog_version', MY_CATALOG_VERSION );
 	} else {

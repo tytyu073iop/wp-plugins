@@ -21,6 +21,27 @@ final class My_Catalog_Plugin {
 	private static $instance = null;
 
 	/**
+	 * Core catalog module.
+	 *
+	 * @var My_Catalog_Core
+	 */
+	private $core;
+
+	/**
+	 * Product table module.
+	 *
+	 * @var My_Catalog_Product_Table
+	 */
+	private $product_table;
+
+	/**
+	 * News carousel module.
+	 *
+	 * @var My_Catalog_News_Carousel
+	 */
+	private $news_carousel;
+
+	/**
 	 * Returns plugin instance.
 	 *
 	 * @return My_Catalog_Plugin
@@ -37,9 +58,12 @@ final class My_Catalog_Plugin {
 	 * Constructor.
 	 */
 	private function __construct() {
+		$this->core          = new My_Catalog_Core();
+		$this->product_table = new My_Catalog_Product_Table();
+		$this->news_carousel = new My_Catalog_News_Carousel();
+
 		add_action( 'init', array( $this, 'register_block' ) );
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
-		add_shortcode( 'my_catalog_message', array( $this, 'render_catalog_message' ) );
 	}
 
 	/**
@@ -62,17 +86,5 @@ final class My_Catalog_Plugin {
 		if ( file_exists( $build_dir . '/block.json' ) ) {
 			register_block_type( $build_dir );
 		}
-	}
-
-	/**
-	 * Renders a simple shortcode example for classic plugin functionality.
-	 *
-	 * @return string
-	 */
-	public function render_catalog_message() {
-		return sprintf(
-			'<div class="my-catalog-message">%s</div>',
-			esc_html__( 'My Catalog is active and ready for custom features.', 'my-catalog' )
-		);
 	}
 }
