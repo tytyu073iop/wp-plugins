@@ -1,6 +1,6 @@
 <?php
 /**
- * News carousel shortcode and rendering.
+ * News carousel rendering.
  *
  * @package MyCatalog
  */
@@ -24,7 +24,6 @@ class My_Catalog_News_Carousel {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_shortcode( 'news_carousel', array( $this, 'render_shortcode' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_assets' ) );
 	}
 
@@ -66,24 +65,30 @@ class My_Catalog_News_Carousel {
 	}
 
 	/**
-	 * Renders the news carousel shortcode.
+	 * Renders the news carousel block.
 	 *
-	 * @param array<string, mixed> $atts Shortcode attributes.
+	 * @param array<string, mixed> $attributes Block attributes.
 	 * @return string
 	 */
-	public function render_shortcode( $atts ) {
-		$atts = shortcode_atts(
-			array(
-				'limit'           => 6,
-				'category'        => '',
-				'slides_per_view' => 3,
-				'autoplay'        => 'true',
-				'autoplay_delay'  => 5000,
-			),
-			$atts,
-			'news_carousel'
+	public function render_block( $attributes ) {
+		$atts = array(
+			'limit'           => isset( $attributes['limit'] ) ? $attributes['limit'] : 6,
+			'category'        => isset( $attributes['category'] ) ? $attributes['category'] : '',
+			'slides_per_view' => isset( $attributes['slidesPerView'] ) ? $attributes['slidesPerView'] : 3,
+			'autoplay'        => isset( $attributes['autoplay'] ) ? $attributes['autoplay'] : true,
+			'autoplay_delay'  => isset( $attributes['autoplayDelay'] ) ? $attributes['autoplayDelay'] : 5000,
 		);
 
+		return $this->render( $atts );
+	}
+
+	/**
+	 * Renders the news carousel markup.
+	 *
+	 * @param array<string, mixed> $atts Carousel attributes.
+	 * @return string
+	 */
+	public function render( $atts ) {
 		$query_args = array(
 			'post_type'           => My_Catalog_Core::NEWS_POST_TYPE,
 			'post_status'         => 'publish',

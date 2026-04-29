@@ -1,6 +1,12 @@
-.wp-block-my-catalog-notice {
-	border: 1px dashed #8a8f98;
-	padding: 16px;
-	border-radius: 8px;
-	background: #f6f7f7;
+.wp-block-my-catalog-news-carousel {
+	.components-disabled {
+		opacity: 1;
+	}
+}
+
+.my-catalog-news-carousel__control-state {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 40px;
 }

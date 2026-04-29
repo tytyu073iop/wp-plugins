@@ -84,7 +84,12 @@ final class My_Catalog_Plugin {
 		$block_dir = MY_CATALOG_PATH;
 
 		if ( file_exists( $block_dir . '/block.json' ) ) {
-			register_block_type( $block_dir );
+			register_block_type(
+				$block_dir,
+				array(
+					'render_callback' => array( $this->news_carousel, 'render_block' ),
+				)
+			);
 		}
 	}
 }
