@@ -81,10 +81,10 @@ final class My_Catalog_Plugin {
 	 * @return void
 	 */
 	public function register_block() {
-		$build_dir = MY_CATALOG_PATH . 'build';
+		$block_dir = MY_CATALOG_PATH;
 
-		if ( file_exists( $build_dir . '/block.json' ) ) {
-			register_block_type( $build_dir );
+		if ( file_exists( $block_dir . '/block.json' ) ) {
+			register_block_type( $block_dir );
 		}
 	}
 }
