@@ -6,7 +6,7 @@ WordPress catalog plugin with:
 - taxonomies for product categories, product attributes, and news categories
 - custom meta boxes for product and news fields
 - shortcode `[product_table]` with DataTables-powered filtering and sorting
-- shortcode `[news_carousel]` with Swiper-based carousel output
+- Gutenberg `News Carousel` block with Swiper-based carousel output
 - Gutenberg block build tooling and local `wp-env` config
 
 ## Quick start
@@ -22,17 +22,18 @@ Then open the local WordPress site created by `wp-env` and activate the `My Cata
 ## Structure
 
 - `my-catalog.php`: main plugin bootstrap
-- `includes/`: PHP classes for content types, shortcodes, and REST logic
+- `includes/`: PHP classes for content types, block rendering, shortcodes, and REST logic
 - `src/`: block source files
 - `build/`: generated assets after running the build
 - `.wp-env.json`: local WordPress environment config
 
-## Shortcodes
+## Frontend Embeds
 
 ```text
 [product_table limit="12" category="featured" columns="image,title,price,category,sku,external"]
-[news_carousel limit="6" category="promotions" slides_per_view="3" autoplay="true"]
 ```
+
+Use the `News Carousel` block in the block editor to insert the news slider.
 
 ## Theme override
 
