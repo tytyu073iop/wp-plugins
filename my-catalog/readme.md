@@ -6,7 +6,7 @@ WordPress catalog plugin with:
 - taxonomies for product categories, product attributes, and news categories
 - custom meta boxes for product and news fields
 - shortcode `[product_table]` with DataTables-powered filtering and sorting
-- Gutenberg `News Carousel` block with Swiper-based carousel output
+- Gutenberg `News Carousel` block powered by the WordPress Interactivity API
 - Gutenberg block build tooling and local `wp-env` config
 
 ## Quick start

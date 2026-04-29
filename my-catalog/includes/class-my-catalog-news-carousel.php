@@ -24,7 +24,7 @@ class My_Catalog_News_Carousel {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'wp_enqueue_scripts', array( $this, 'register_assets' ) );
+		add_action( 'init', array( $this, 'register_assets' ) );
 	}
 
 	/**
@@ -34,33 +34,17 @@ class My_Catalog_News_Carousel {
 	 */
 	public function register_assets() {
 		wp_register_style(
-			'my-catalog-swiper',
-			'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css',
-			array(),
-			'11.1.4'
-		);
-
-		wp_register_style(
 			'my-catalog-news-carousel',
 			MY_CATALOG_URL . 'assets/css/news-carousel.css',
-			array( 'my-catalog-swiper' ),
+			array(),
 			MY_CATALOG_VERSION
 		);
 
-		wp_register_script(
-			'my-catalog-swiper',
-			'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
-			array(),
-			'11.1.4',
-			true
-		);
-
-		wp_register_script(
-			'my-catalog-news-carousel',
-			MY_CATALOG_URL . 'assets/js/news-carousel.js',
-			array( 'my-catalog-swiper' ),
-			MY_CATALOG_VERSION,
-			true
+		wp_register_script_module(
+			'my-catalog/news-carousel',
+			MY_CATALOG_URL . 'assets/js/news-carousel-view.js',
+			array( '@wordpress/interactivity' ),
+			MY_CATALOG_VERSION
 		);
 	}
 
@@ -117,21 +101,34 @@ class My_Catalog_News_Carousel {
 		}
 
 		wp_enqueue_style( 'my-catalog-news-carousel' );
-		wp_enqueue_script( 'my-catalog-news-carousel' );
+		wp_enqueue_script_module( 'my-catalog/news-carousel' );
 
 		$instance_id = 'my-catalog-news-carousel-' . ++self::$instance;
 		$config      = array(
-			'slidesPerView' => max( 1, absint( $atts['slides_per_view'] ) ),
-			'autoplay'      => filter_var( $atts['autoplay'], FILTER_VALIDATE_BOOLEAN ),
-			'autoplayDelay' => max( 1000, absint( $atts['autoplay_delay'] ) ),
-			'slideCount'    => (int) $query->post_count,
+			'autoplay'        => filter_var( $atts['autoplay'], FILTER_VALIDATE_BOOLEAN ),
+			'autoplayDelay'   => max( 1000, absint( $atts['autoplay_delay'] ) ),
+			'currentIndex'    => 0,
+			'desktopSlides'   => max( 1, absint( $atts['slides_per_view'] ) ),
+			'visibleSlides'   => 1,
+			'slideCount'      => (int) $query->post_count,
+			'isPaused'        => false,
 		);
 
 		ob_start();
 		?>
-		<div class="my-catalog-news-carousel" id="<?php echo esc_attr( $instance_id ); ?>" data-config="<?php echo esc_attr( wp_json_encode( $config ) ); ?>">
-			<div class="swiper">
-				<div class="swiper-wrapper">
+		<div
+			<?php echo get_block_wrapper_attributes( array( 'class' => 'my-catalog-news-carousel' ) ); ?>
+			id="<?php echo esc_attr( $instance_id ); ?>"
+			data-wp-interactive="my-catalog/news-carousel"
+			data-wp-context='<?php echo esc_attr( wp_json_encode( $config ) ); ?>'
+			data-wp-init="callbacks.initCarousel"
+			data-wp-init--autoplay="callbacks.initAutoplay"
+			data-wp-on-window--resize="callbacks.handleResize"
+			data-wp-on--mouseenter="actions.pause"
+			data-wp-on--mouseleave="actions.resume"
+		>
+			<div class="my-catalog-news-carousel__viewport">
+				<div class="my-catalog-news-carousel__track" data-wp-watch="callbacks.updateTrack">
 					<?php
 					foreach ( $query->posts as $post ) {
 						echo $this->render_slide( $post ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -139,12 +136,35 @@ class My_Catalog_News_Carousel {
 					?>
 				</div>
 			</div>
-			<div class="my-catalog-news-carousel__navigation">
-				<button type="button" class="my-catalog-news-carousel__arrow my-catalog-news-carousel__arrow--prev" aria-label="<?php esc_attr_e( 'Previous slide', 'my-catalog' ); ?>">
+			<div class="my-catalog-news-carousel__navigation" data-wp-bind--hidden="!state.hasOverflow">
+				<button
+					type="button"
+					class="my-catalog-news-carousel__arrow my-catalog-news-carousel__arrow--prev"
+					aria-label="<?php esc_attr_e( 'Previous slide', 'my-catalog' ); ?>"
+					data-wp-on--click="actions.previous"
+					data-wp-bind--disabled="state.isAtStart"
+				>
 					<span aria-hidden="true">&larr;</span>
 				</button>
-				<div class="swiper-pagination"></div>
-				<button type="button" class="my-catalog-news-carousel__arrow my-catalog-news-carousel__arrow--next" aria-label="<?php esc_attr_e( 'Next slide', 'my-catalog' ); ?>">
+				<div class="my-catalog-news-carousel__pagination" aria-label="<?php esc_attr_e( 'News carousel pagination', 'my-catalog' ); ?>">
+					<?php for ( $index = 0; $index < $query->post_count; $index++ ) : ?>
+						<button
+							type="button"
+							class="my-catalog-news-carousel__dot"
+							aria-label="<?php echo esc_attr( sprintf( __( 'Go to slide %d', 'my-catalog' ), $index + 1 ) ); ?>"
+							data-wp-context='{ "targetIndex": <?php echo esc_attr( wp_json_encode( $index ) ); ?> }'
+							data-wp-on--click="actions.goTo"
+							data-wp-class--is-active="state.isDotActive"
+						></button>
+					<?php endfor; ?>
+				</div>
+				<button
+					type="button"
+					class="my-catalog-news-carousel__arrow my-catalog-news-carousel__arrow--next"
+					aria-label="<?php esc_attr_e( 'Next slide', 'my-catalog' ); ?>"
+					data-wp-on--click="actions.next"
+					data-wp-bind--disabled="state.isAtEnd"
+				>
 					<span aria-hidden="true">&rarr;</span>
 				</button>
 			</div>

@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<article class="swiper-slide my-catalog-news-carousel__slide">
+<article class="my-catalog-news-carousel__slide">
 	<div class="my-catalog-news-carousel__media">
 		<?php if ( ! empty( $data['image_html'] ) ) : ?>
 			<?php echo $data['image_html']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>

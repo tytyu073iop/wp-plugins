@@ -12,7 +12,8 @@
   "editorStyle": "file:./build/index.css",
   "style": "file:./build/style-index.css",
   "supports": {
-    "html": false
+    "html": false,
+    "interactivity": true
   },
   "attributes": {
     "limit": {
