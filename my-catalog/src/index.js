@@ -21,7 +21,7 @@ import './style.scss';
 
 registerBlockType( metadata.name, {
 	edit( { attributes, setAttributes } ) {
-		const { limit, category, slidesPerView, autoplay, autoplayDelay } = attributes;
+		const { limit, category, autoplay, autoplayDelay } = attributes;
 		const blockProps = useBlockProps( {
 			className: 'wp-block-my-catalog-news-carousel',
 		} );
@@ -68,15 +68,6 @@ registerBlockType( metadata.name, {
 								}
 							/>
 						) }
-						<RangeControl
-							label={ __( 'Slides on desktop', 'my-catalog' ) }
-							value={ slidesPerView }
-							onChange={ ( nextValue ) =>
-								setAttributes( { slidesPerView: nextValue || 1 } )
-							}
-							min={ 1 }
-							max={ 4 }
-						/>
 						<ToggleControl
 							label={ __( 'Autoplay', 'my-catalog' ) }
 							checked={ autoplay }

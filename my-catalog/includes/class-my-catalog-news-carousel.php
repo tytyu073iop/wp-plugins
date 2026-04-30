@@ -74,7 +74,7 @@ class My_Catalog_News_Carousel {
 		$atts = array(
 			'limit'           => isset( $attributes['limit'] ) ? $attributes['limit'] : 6,
 			'category'        => isset( $attributes['category'] ) ? $attributes['category'] : '',
-			'slides_per_view' => isset( $attributes['slidesPerView'] ) ? $attributes['slidesPerView'] : 3,
+			'slides_per_view' => 1,
 			'autoplay'        => isset( $attributes['autoplay'] ) ? $attributes['autoplay'] : true,
 			'autoplay_delay'  => isset( $attributes['autoplayDelay'] ) ? $attributes['autoplayDelay'] : 5000,
 		);
@@ -121,7 +121,7 @@ class My_Catalog_News_Carousel {
 
 		$instance_id = 'my-catalog-news-carousel-' . ++self::$instance;
 		$config      = array(
-			'slidesPerView' => max( 1, absint( $atts['slides_per_view'] ) ),
+			'slidesPerView' => 1,
 			'autoplay'      => filter_var( $atts['autoplay'], FILTER_VALIDATE_BOOLEAN ),
 			'autoplayDelay' => max( 1000, absint( $atts['autoplay_delay'] ) ),
 			'slideCount'    => (int) $query->post_count,

@@ -14,14 +14,13 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			return;
 		}
 
-		const slidesPerView = Math.max( 1, parseInt( config.slidesPerView, 10 ) || 1 );
 		const slideCount = Math.max( 1, parseInt( config.slideCount, 10 ) || 1 );
 		const autoplayEnabled = Boolean( config.autoplay ) && slideCount > 1;
 
 		new Swiper( carousel.querySelector( '.swiper' ), {
 			slidesPerView: 1,
 			spaceBetween: 24,
-			loop: slideCount > slidesPerView,
+			loop: slideCount > 1,
 			grabCursor: true,
 			autoplay: autoplayEnabled
 				? {
@@ -37,14 +36,6 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			pagination: {
 				el: carousel.querySelector( '.swiper-pagination' ),
 				clickable: true,
-			},
-			breakpoints: {
-				640: {
-					slidesPerView: Math.min( slidesPerView, 2 ),
-				},
-				1024: {
-					slidesPerView: slidesPerView,
-				},
 			},
 		} );
 	} );
