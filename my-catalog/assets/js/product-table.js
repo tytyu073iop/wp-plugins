@@ -73,6 +73,18 @@
 				columns: columns,
 			} );
 
+			$table.on( 'click', 'tbody tr', function ( event ) {
+				if ( $( event.target ).closest( 'a, button, input, select, textarea' ).length ) {
+					return;
+				}
+
+				const row = table.row( this ).data();
+
+				if ( row && row.permalink ) {
+					window.location.href = row.permalink;
+				}
+			} );
+
 			$category.add( $tag ).on( 'change', function () {
 				table.ajax.reload();
 			} );

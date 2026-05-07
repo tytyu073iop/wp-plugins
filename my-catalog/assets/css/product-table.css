@@ -46,6 +46,7 @@
 
 .my-catalog-product-table table.dataTable tbody tr:hover {
 	background: #f6f7f7;
+	cursor: pointer;
 }
 
 .my-catalog-product-table table.dataTable tbody td {

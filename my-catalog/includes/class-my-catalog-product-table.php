@@ -347,7 +347,9 @@ class My_Catalog_Product_Table {
 	 * @return array<string, string>
 	 */
 	private function format_product_row( WP_Post $product, $columns ) {
-		$row = array();
+		$row = array(
+			'permalink' => esc_url_raw( get_permalink( $product ) ),
+		);
 
 		foreach ( $columns as $column ) {
 			$key = $column['key'];
