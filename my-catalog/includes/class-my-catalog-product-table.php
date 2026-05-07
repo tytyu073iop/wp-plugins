@@ -30,10 +30,55 @@ class My_Catalog_Product_Table {
 	 */
 	public function __construct() {
 		add_shortcode( 'product_table', array( $this, 'render_shortcode' ) );
+		add_shortcode( 'my_catalog_price', array( $this, 'render_price_shortcode' ) );
+		add_shortcode( 'my_catalog_stock', array( $this, 'render_stock_shortcode' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_assets' ) );
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_menu', array( $this, 'register_settings_page' ) );
+	}
+
+	/**
+	 * Renders the current product price.
+	 *
+	 * @return string
+	 */
+	public function render_price_shortcode() {
+		$post_id = get_the_ID();
+
+		if ( ! $post_id || My_Catalog_Core::PRODUCT_POST_TYPE !== get_post_type( $post_id ) ) {
+			return '';
+		}
+
+		$price = get_post_meta( $post_id, My_Catalog_Core::PRODUCT_META_PRICE, true );
+
+		if ( '' === $price ) {
+			return '';
+		}
+
+		return esc_html( number_format_i18n( (float) $price, 2 ) );
+	}
+
+	/**
+	 * Renders the current product stock status label.
+	 *
+	 * @return string
+	 */
+	public function render_stock_shortcode() {
+		$post_id = get_the_ID();
+
+		if ( ! $post_id || My_Catalog_Core::PRODUCT_POST_TYPE !== get_post_type( $post_id ) ) {
+			return '';
+		}
+
+		$stock_status = get_post_meta( $post_id, My_Catalog_Core::PRODUCT_META_STOCK, true );
+		$stock_map    = My_Catalog_Core::get_stock_statuses();
+
+		if ( ! isset( $stock_map[ $stock_status ] ) ) {
+			return '';
+		}
+
+		return esc_html( $stock_map[ $stock_status ] );
 	}
 
 	/**
