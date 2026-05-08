@@ -48,7 +48,6 @@
 			} );
 			const $filters = $internalFilters.add( $externalFilters );
 			const $category = $filters.find( '.js-my-catalog-product-category' );
-			const $tag = $filters.find( '.js-my-catalog-product-tag' );
 			const columns = ( config.columns || [] ).map( function ( column ) {
 				return {
 					data: column.key,
@@ -82,7 +81,7 @@
 							order_column: orderColumn,
 							order_dir: order.dir || 'asc',
 							category: getFilterValue( $category ),
-							tag: getFilterValue( $tag ),
+							tag: '',
 							base_category: config.baseCategory || '',
 							base_tag: config.baseTag || '',
 							columns: columns.map( function ( column ) {
@@ -106,7 +105,7 @@
 				}
 			} );
 
-			$category.add( $tag ).on( 'change', function () {
+			$category.on( 'change', function () {
 				table.ajax.reload();
 			} );
 		} );

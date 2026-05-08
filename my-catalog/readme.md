@@ -42,7 +42,7 @@ For separate filters, give the table an ID and point the filters at it:
 ```
 
 Use the `News Carousel` block in the block editor to insert the news slider.
-Use the `Product Filters` block to place category and attribute filters separately from the table.
+Use the `Product Filters` block to place category filters separately from the table.
 
 ## Theme override
 

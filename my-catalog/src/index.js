@@ -100,7 +100,7 @@ function NewsCarouselEdit( { attributes, setAttributes } ) {
 }
 
 function ProductFiltersEdit( { attributes, setAttributes } ) {
-	const { target, showCategory, showAttributes } = attributes;
+	const { target, showCategory } = attributes;
 	const blockProps = useBlockProps( {
 		className: 'wp-block-my-catalog-product-filters',
 	} );
@@ -125,13 +125,6 @@ function ProductFiltersEdit( { attributes, setAttributes } ) {
 						checked={ showCategory }
 						onChange={ ( nextValue ) =>
 							setAttributes( { showCategory: nextValue } )
-						}
-					/>
-					<ToggleControl
-						label={ __( 'Attribute filter', 'my-catalog' ) }
-						checked={ showAttributes }
-						onChange={ ( nextValue ) =>
-							setAttributes( { showAttributes: nextValue } )
 						}
 					/>
 				</PanelBody>

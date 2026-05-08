@@ -1,5 +1,14 @@
 .my-catalog-product-table {
+	flex: 1 1 100%;
+	min-width: 0;
+	width: 100%;
 	margin: 2rem 0;
+}
+
+.wp-block-shortcode:has(.my-catalog-product-table) {
+	flex: 1 1 100%;
+	min-width: 0;
+	width: 100%;
 }
 
 .my-catalog-product-table__filters {

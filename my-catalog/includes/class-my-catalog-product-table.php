@@ -306,9 +306,8 @@ class My_Catalog_Product_Table {
 	public function render_filters_shortcode( $atts ) {
 		$atts = shortcode_atts(
 			array(
-				'target'          => '',
-				'show_category'   => 'true',
-				'show_attributes' => 'true',
+				'target'        => '',
+				'show_category' => 'true',
 			),
 			$atts,
 			'product_filters'
@@ -319,10 +318,9 @@ class My_Catalog_Product_Table {
 
 		return $this->render_filter_controls(
 			array(
-				'target'          => sanitize_html_class( $atts['target'] ),
-				'show_category'   => filter_var( $atts['show_category'], FILTER_VALIDATE_BOOLEAN ),
-				'show_attributes' => filter_var( $atts['show_attributes'], FILTER_VALIDATE_BOOLEAN ),
-				'external'        => true,
+				'target'        => sanitize_html_class( $atts['target'] ),
+				'show_category' => filter_var( $atts['show_category'], FILTER_VALIDATE_BOOLEAN ),
+				'external'      => true,
 			)
 		);
 	}
@@ -336,9 +334,8 @@ class My_Catalog_Product_Table {
 	public function render_filters_block( $attributes ) {
 		return $this->render_filters_shortcode(
 			array(
-				'target'          => isset( $attributes['target'] ) ? $attributes['target'] : '',
-				'show_category'   => empty( $attributes['showCategory'] ) ? 'false' : 'true',
-				'show_attributes' => empty( $attributes['showAttributes'] ) ? 'false' : 'true',
+				'target'        => isset( $attributes['target'] ) ? $attributes['target'] : '',
+				'show_category' => empty( $attributes['showCategory'] ) ? 'false' : 'true',
 			)
 		);
 	}
@@ -353,10 +350,9 @@ class My_Catalog_Product_Table {
 		$args = wp_parse_args(
 			$args,
 			array(
-				'target'          => '',
-				'show_category'   => true,
-				'show_attributes' => true,
-				'external'        => false,
+				'target'        => '',
+				'show_category' => true,
+				'external'      => false,
 			)
 		);
 
@@ -381,17 +377,6 @@ class My_Catalog_Product_Table {
 				</label>
 			<?php endif; ?>
 
-			<?php if ( ! empty( $args['show_attributes'] ) ) : ?>
-				<label class="my-catalog-product-table__filter">
-					<span><?php esc_html_e( 'Attribute', 'my-catalog' ); ?></span>
-					<select class="js-my-catalog-product-tag">
-						<option value=""><?php esc_html_e( 'All attributes', 'my-catalog' ); ?></option>
-						<?php foreach ( $this->get_terms_for_filter( My_Catalog_Core::PRODUCT_TAG_TAXONOMY ) as $term ) : ?>
-							<option value="<?php echo esc_attr( $term->slug ); ?>"><?php echo esc_html( $term->name ); ?></option>
-						<?php endforeach; ?>
-					</select>
-				</label>
-			<?php endif; ?>
 		</div>
 		<?php
 
