@@ -366,6 +366,8 @@ class My_Catalog_Product_Table {
 			$classes .= ' my-catalog-product-filters';
 		}
 
+		$price_bounds = $this->get_price_filter_bounds();
+
 		ob_start();
 		?>
 		<div class="<?php echo esc_attr( $classes ); ?>" <?php echo ! empty( $args['target'] ) ? 'data-target="' . esc_attr( $args['target'] ) . '"' : ''; ?>>
@@ -382,14 +384,29 @@ class My_Catalog_Product_Table {
 			<?php endif; ?>
 
 			<?php if ( ! empty( $args['show_price'] ) ) : ?>
-				<label class="my-catalog-product-table__filter my-catalog-product-table__filter--price">
-					<span><?php esc_html_e( 'Min price', 'my-catalog' ); ?></span>
-					<input class="js-my-catalog-product-price-min" type="number" min="0" step="0.01" inputmode="decimal" placeholder="<?php esc_attr_e( 'Any', 'my-catalog' ); ?>" />
-				</label>
-				<label class="my-catalog-product-table__filter my-catalog-product-table__filter--price">
-					<span><?php esc_html_e( 'Max price', 'my-catalog' ); ?></span>
-					<input class="js-my-catalog-product-price-max" type="number" min="0" step="0.01" inputmode="decimal" placeholder="<?php esc_attr_e( 'Any', 'my-catalog' ); ?>" />
-				</label>
+				<div
+					class="my-catalog-product-table__filter my-catalog-product-table__filter--price-range js-my-catalog-product-price-range"
+					data-min="<?php echo esc_attr( $price_bounds['min'] ); ?>"
+					data-max="<?php echo esc_attr( $price_bounds['max'] ); ?>"
+					data-step="0.01"
+				>
+					<span><?php esc_html_e( 'Price', 'my-catalog' ); ?></span>
+					<div class="my-catalog-product-table__price-fields">
+						<label>
+							<span><?php esc_html_e( 'Min', 'my-catalog' ); ?></span>
+							<input class="js-my-catalog-product-price-min" type="number" min="<?php echo esc_attr( $price_bounds['min'] ); ?>" max="<?php echo esc_attr( $price_bounds['max'] ); ?>" step="0.01" inputmode="decimal" value="<?php echo esc_attr( $price_bounds['min'] ); ?>" />
+						</label>
+						<label>
+							<span><?php esc_html_e( 'Max', 'my-catalog' ); ?></span>
+							<input class="js-my-catalog-product-price-max" type="number" min="<?php echo esc_attr( $price_bounds['min'] ); ?>" max="<?php echo esc_attr( $price_bounds['max'] ); ?>" step="0.01" inputmode="decimal" value="<?php echo esc_attr( $price_bounds['max'] ); ?>" />
+						</label>
+					</div>
+					<div class="my-catalog-product-table__range-slider">
+						<div class="my-catalog-product-table__range-track"></div>
+						<input class="js-my-catalog-product-price-min-range" type="range" min="<?php echo esc_attr( $price_bounds['min'] ); ?>" max="<?php echo esc_attr( $price_bounds['max'] ); ?>" step="0.01" value="<?php echo esc_attr( $price_bounds['min'] ); ?>" aria-label="<?php esc_attr_e( 'Minimum price', 'my-catalog' ); ?>" />
+						<input class="js-my-catalog-product-price-max-range" type="range" min="<?php echo esc_attr( $price_bounds['min'] ); ?>" max="<?php echo esc_attr( $price_bounds['max'] ); ?>" step="0.01" value="<?php echo esc_attr( $price_bounds['max'] ); ?>" aria-label="<?php esc_attr_e( 'Maximum price', 'my-catalog' ); ?>" />
+					</div>
+				</div>
 			<?php endif; ?>
 
 		</div>
@@ -804,6 +821,39 @@ class My_Catalog_Product_Table {
 		);
 
 		return is_array( $terms ) ? $terms : array();
+	}
+
+	/**
+	 * Returns min and max prices for the range filter.
+	 *
+	 * @return array{min: float, max: float}
+	 */
+	private function get_price_filter_bounds() {
+		global $wpdb;
+
+		$bounds = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT MIN(CAST(meta_value AS DECIMAL(20, 4))) AS min_price, MAX(CAST(meta_value AS DECIMAL(20, 4))) AS max_price
+				FROM {$wpdb->postmeta}
+				WHERE meta_key = %s
+					AND meta_value != ''
+					AND meta_value REGEXP '^[0-9]+(\\\\.[0-9]+)?$'",
+				My_Catalog_Core::PRODUCT_META_PRICE
+			),
+			ARRAY_A
+		);
+
+		$min = isset( $bounds['min_price'] ) ? floor( (float) $bounds['min_price'] ) : 0;
+		$max = isset( $bounds['max_price'] ) ? ceil( (float) $bounds['max_price'] ) : 0;
+
+		if ( $max <= $min ) {
+			$max = $min + 1;
+		}
+
+		return array(
+			'min' => $min,
+			'max' => $max,
+		);
 	}
 
 	/**
