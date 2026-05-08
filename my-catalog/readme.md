@@ -7,7 +7,7 @@ WordPress catalog plugin with:
 - custom meta boxes for product and news fields
 - shortcodes `[product_table]` and `[product_filters]` with DataTables-powered filtering and sorting
 - Gutenberg `News Carousel` block with Swiper-based carousel output
-- Gutenberg `Product Filters` block for separate product table filters
+- Gutenberg `Product Filters` block for separate product table category and price filters
 - Gutenberg block build tooling and local `wp-env` config
 
 ## Quick start
@@ -42,7 +42,7 @@ For separate filters, give the table an ID and point the filters at it:
 ```
 
 Use the `News Carousel` block in the block editor to insert the news slider.
-Use the `Product Filters` block to place category filters separately from the table.
+Use the `Product Filters` block to place category and price filters separately from the table.
 
 ## Theme override
 

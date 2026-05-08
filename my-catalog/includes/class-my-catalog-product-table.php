@@ -308,6 +308,7 @@ class My_Catalog_Product_Table {
 			array(
 				'target'        => '',
 				'show_category' => 'true',
+				'show_price'    => 'true',
 			),
 			$atts,
 			'product_filters'
@@ -320,6 +321,7 @@ class My_Catalog_Product_Table {
 			array(
 				'target'        => sanitize_html_class( $atts['target'] ),
 				'show_category' => filter_var( $atts['show_category'], FILTER_VALIDATE_BOOLEAN ),
+				'show_price'    => filter_var( $atts['show_price'], FILTER_VALIDATE_BOOLEAN ),
 				'external'      => true,
 			)
 		);
@@ -336,6 +338,7 @@ class My_Catalog_Product_Table {
 			array(
 				'target'        => isset( $attributes['target'] ) ? $attributes['target'] : '',
 				'show_category' => empty( $attributes['showCategory'] ) ? 'false' : 'true',
+				'show_price'    => empty( $attributes['showPrice'] ) ? 'false' : 'true',
 			)
 		);
 	}
@@ -352,6 +355,7 @@ class My_Catalog_Product_Table {
 			array(
 				'target'        => '',
 				'show_category' => true,
+				'show_price'    => true,
 				'external'      => false,
 			)
 		);
@@ -377,6 +381,17 @@ class My_Catalog_Product_Table {
 				</label>
 			<?php endif; ?>
 
+			<?php if ( ! empty( $args['show_price'] ) ) : ?>
+				<label class="my-catalog-product-table__filter my-catalog-product-table__filter--price">
+					<span><?php esc_html_e( 'Min price', 'my-catalog' ); ?></span>
+					<input class="js-my-catalog-product-price-min" type="number" min="0" step="0.01" inputmode="decimal" placeholder="<?php esc_attr_e( 'Any', 'my-catalog' ); ?>" />
+				</label>
+				<label class="my-catalog-product-table__filter my-catalog-product-table__filter--price">
+					<span><?php esc_html_e( 'Max price', 'my-catalog' ); ?></span>
+					<input class="js-my-catalog-product-price-max" type="number" min="0" step="0.01" inputmode="decimal" placeholder="<?php esc_attr_e( 'Any', 'my-catalog' ); ?>" />
+				</label>
+			<?php endif; ?>
+
 		</div>
 		<?php
 
@@ -396,6 +411,8 @@ class My_Catalog_Product_Table {
 		$search_term       = sanitize_text_field( (string) $request->get_param( 'search' ) );
 		$filter_category   = sanitize_text_field( (string) $request->get_param( 'category' ) );
 		$filter_tag        = sanitize_text_field( (string) $request->get_param( 'tag' ) );
+		$filter_price_min  = $this->sanitize_price_filter_value( $request->get_param( 'price_min' ) );
+		$filter_price_max  = $this->sanitize_price_filter_value( $request->get_param( 'price_max' ) );
 		$base_category     = sanitize_text_field( (string) $request->get_param( 'base_category' ) );
 		$base_tag          = sanitize_text_field( (string) $request->get_param( 'base_tag' ) );
 		$length            = max( 1, absint( $request->get_param( 'length' ) ) );
@@ -410,6 +427,8 @@ class My_Catalog_Product_Table {
 				'base_tag'        => $base_tag,
 				'filter_category' => '',
 				'filter_tag'      => '',
+				'filter_price_min' => null,
+				'filter_price_max' => null,
 				'search'          => '',
 				'posts_per_page'  => 1,
 				'offset'          => 0,
@@ -422,6 +441,8 @@ class My_Catalog_Product_Table {
 				'base_tag'        => $base_tag,
 				'filter_category' => $filter_category,
 				'filter_tag'      => $filter_tag,
+				'filter_price_min' => $filter_price_min,
+				'filter_price_max' => $filter_price_max,
 				'search'          => $search_term,
 				'posts_per_page'  => $length,
 				'offset'          => $start,
@@ -541,6 +562,15 @@ class My_Catalog_Product_Table {
 
 		if ( ! empty( $tax_query ) ) {
 			$query_args['tax_query'] = $tax_query;
+		}
+
+		$meta_query = $this->build_meta_query(
+			isset( $args['filter_price_min'] ) ? $args['filter_price_min'] : null,
+			isset( $args['filter_price_max'] ) ? $args['filter_price_max'] : null
+		);
+
+		if ( ! empty( $meta_query ) ) {
+			$query_args['meta_query'] = $meta_query;
 		}
 
 		$order_column = ! empty( $args['order_column'] ) ? $args['order_column'] : 'title';
@@ -667,6 +697,67 @@ class My_Catalog_Product_Table {
 		}
 
 		return $tax_query;
+	}
+
+	/**
+	 * Builds a meta query from active UI filters.
+	 *
+	 * @param float|null $filter_price_min Active minimum price filter.
+	 * @param float|null $filter_price_max Active maximum price filter.
+	 * @return array<int|string, array<string, mixed>|string>
+	 */
+	private function build_meta_query( $filter_price_min, $filter_price_max ) {
+		$meta_query = array();
+
+		if ( null !== $filter_price_min && null !== $filter_price_max && $filter_price_min > $filter_price_max ) {
+			$swap             = $filter_price_min;
+			$filter_price_min = $filter_price_max;
+			$filter_price_max = $swap;
+		}
+
+		if ( null !== $filter_price_min ) {
+			$meta_query[] = array(
+				'key'     => My_Catalog_Core::PRODUCT_META_PRICE,
+				'value'   => $filter_price_min,
+				'compare' => '>=',
+				'type'    => 'NUMERIC',
+			);
+		}
+
+		if ( null !== $filter_price_max ) {
+			$meta_query[] = array(
+				'key'     => My_Catalog_Core::PRODUCT_META_PRICE,
+				'value'   => $filter_price_max,
+				'compare' => '<=',
+				'type'    => 'NUMERIC',
+			);
+		}
+
+		if ( count( $meta_query ) > 1 ) {
+			$meta_query['relation'] = 'AND';
+		}
+
+		return $meta_query;
+	}
+
+	/**
+	 * Sanitizes a submitted price filter value.
+	 *
+	 * @param mixed $value Submitted value.
+	 * @return float|null
+	 */
+	private function sanitize_price_filter_value( $value ) {
+		if ( null === $value || '' === $value ) {
+			return null;
+		}
+
+		$value = is_string( $value ) ? str_replace( ',', '.', $value ) : $value;
+
+		if ( ! is_numeric( $value ) ) {
+			return null;
+		}
+
+		return max( 0, (float) $value );
 	}
 
 	/**

@@ -6,7 +6,7 @@
   "title": "Product Filters",
   "category": "widgets",
   "icon": "filter",
-  "description": "Display product category filters for a product table.",
+  "description": "Display product filters for a product table.",
   "textdomain": "my-catalog",
   "editorScript": "file:../../build/index.js",
   "editorStyle": "file:../../build/index.css",
@@ -20,6 +20,10 @@
       "default": ""
     },
     "showCategory": {
+      "type": "boolean",
+      "default": true
+    },
+    "showPrice": {
       "type": "boolean",
       "default": true
     }

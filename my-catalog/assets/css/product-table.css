@@ -30,12 +30,17 @@
 	font-size: 0.95rem;
 }
 
-.my-catalog-product-table__filter select {
+.my-catalog-product-table__filter select,
+.my-catalog-product-table__filter input {
 	min-height: 42px;
 	padding: 0.55rem 0.75rem;
 	border: 1px solid #ccd0d4;
 	border-radius: 4px;
 	background: #fff;
+}
+
+.my-catalog-product-table__filter--price {
+	min-width: 140px;
 }
 
 .my-catalog-product-table__frame {

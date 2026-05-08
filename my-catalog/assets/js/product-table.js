@@ -48,6 +48,8 @@
 			} );
 			const $filters = $internalFilters.add( $externalFilters );
 			const $category = $filters.find( '.js-my-catalog-product-category' );
+			const $priceMin = $filters.find( '.js-my-catalog-product-price-min' );
+			const $priceMax = $filters.find( '.js-my-catalog-product-price-max' );
 			const columns = ( config.columns || [] ).map( function ( column ) {
 				return {
 					data: column.key,
@@ -82,6 +84,8 @@
 							order_dir: order.dir || 'asc',
 							category: getFilterValue( $category ),
 							tag: '',
+							price_min: getFilterValue( $priceMin ),
+							price_max: getFilterValue( $priceMax ),
 							base_category: config.baseCategory || '',
 							base_tag: config.baseTag || '',
 							columns: columns.map( function ( column ) {
@@ -106,6 +110,10 @@
 			} );
 
 			$category.on( 'change', function () {
+				table.ajax.reload();
+			} );
+
+			$priceMin.add( $priceMax ).on( 'change input', function () {
 				table.ajax.reload();
 			} );
 		} );
