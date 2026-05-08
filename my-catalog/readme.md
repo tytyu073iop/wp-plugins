@@ -38,7 +38,7 @@ For separate filters, give the table an ID and point the filters at it:
 
 ```text
 [product_filters target="featured-products"]
-[product_table table_id="featured-products" show_filters="false" limit="12"]
+[product_table table_id="featured-products" limit="12"]
 ```
 
 Use the `News Carousel` block in the block editor to insert the news slider.

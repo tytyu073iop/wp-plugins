@@ -244,7 +244,6 @@ class My_Catalog_Product_Table {
 				'category'      => '',
 				'tag'           => '',
 				'columns'       => '',
-				'show_filters'  => 'true',
 				'search'        => 'true',
 				'empty_message' => __( 'No products found.', 'my-catalog' ),
 				'table_id'      => '',
@@ -274,10 +273,6 @@ class My_Catalog_Product_Table {
 		ob_start();
 		?>
 		<div class="my-catalog-product-table" id="<?php echo esc_attr( $instance_id ); ?>" data-config="<?php echo esc_attr( wp_json_encode( $config ) ); ?>">
-			<?php if ( filter_var( $atts['show_filters'], FILTER_VALIDATE_BOOLEAN ) ) : ?>
-				<?php echo $this->render_filter_controls(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			<?php endif; ?>
-
 			<div class="my-catalog-product-table__frame">
 				<table class="display responsive nowrap" style="width:100%">
 					<thead>
