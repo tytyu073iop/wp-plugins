@@ -8,7 +8,7 @@
     "start": "wp-scripts start --webpack-copy-php",
     "build": "wp-scripts build --webpack-copy-php",
     "lint:js": "wp-scripts lint-js src",
-    "lint:css": "wp-scripts lint-style src",
+    "lint:css": "wp-scripts lint-style 'src/**/*.scss'",
     "format": "wp-scripts format",
     "env:start": "wp-env start",
     "env:stop": "wp-env stop",

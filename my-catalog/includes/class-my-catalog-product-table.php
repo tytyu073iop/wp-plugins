@@ -30,6 +30,7 @@ class My_Catalog_Product_Table {
 	 */
 	public function __construct() {
 		add_shortcode( 'product_table', array( $this, 'render_shortcode' ) );
+		add_shortcode( 'product_filters', array( $this, 'render_filters_shortcode' ) );
 		add_shortcode( 'my_catalog_price', array( $this, 'render_price_shortcode' ) );
 		add_shortcode( 'my_catalog_stock', array( $this, 'render_stock_shortcode' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_assets' ) );
@@ -243,9 +244,9 @@ class My_Catalog_Product_Table {
 				'category'      => '',
 				'tag'           => '',
 				'columns'       => '',
-				'show_filters'  => 'true',
 				'search'        => 'true',
 				'empty_message' => __( 'No products found.', 'my-catalog' ),
+				'table_id'      => '',
 			),
 			$atts,
 			'product_table'
@@ -253,7 +254,8 @@ class My_Catalog_Product_Table {
 
 		$column_keys = $this->parse_columns_attribute( $atts['columns'] );
 		$columns     = $this->prepare_columns_for_frontend( $column_keys );
-		$instance_id = 'my-catalog-product-table-' . ++self::$instance;
+		$table_id    = sanitize_html_class( $atts['table_id'] );
+		$instance_id = $table_id ? $table_id : 'my-catalog-product-table-' . ++self::$instance;
 
 		wp_enqueue_style( 'my-catalog-product-table' );
 		wp_enqueue_script( 'my-catalog-product-table' );
@@ -271,29 +273,6 @@ class My_Catalog_Product_Table {
 		ob_start();
 		?>
 		<div class="my-catalog-product-table" id="<?php echo esc_attr( $instance_id ); ?>" data-config="<?php echo esc_attr( wp_json_encode( $config ) ); ?>">
-			<?php if ( filter_var( $atts['show_filters'], FILTER_VALIDATE_BOOLEAN ) ) : ?>
-				<div class="my-catalog-product-table__filters">
-					<label class="my-catalog-product-table__filter">
-						<span><?php esc_html_e( 'Category', 'my-catalog' ); ?></span>
-						<select class="js-my-catalog-product-category">
-							<option value=""><?php esc_html_e( 'All categories', 'my-catalog' ); ?></option>
-							<?php foreach ( $this->get_terms_for_filter( My_Catalog_Core::PRODUCT_CATEGORY_TAXONOMY ) as $term ) : ?>
-								<option value="<?php echo esc_attr( $term->slug ); ?>"><?php echo esc_html( $term->name ); ?></option>
-							<?php endforeach; ?>
-						</select>
-					</label>
-					<label class="my-catalog-product-table__filter">
-						<span><?php esc_html_e( 'Attribute', 'my-catalog' ); ?></span>
-						<select class="js-my-catalog-product-tag">
-							<option value=""><?php esc_html_e( 'All attributes', 'my-catalog' ); ?></option>
-							<?php foreach ( $this->get_terms_for_filter( My_Catalog_Core::PRODUCT_TAG_TAXONOMY ) as $term ) : ?>
-								<option value="<?php echo esc_attr( $term->slug ); ?>"><?php echo esc_html( $term->name ); ?></option>
-							<?php endforeach; ?>
-						</select>
-					</label>
-				</div>
-			<?php endif; ?>
-
 			<div class="my-catalog-product-table__frame">
 				<table class="display responsive nowrap" style="width:100%">
 					<thead>
@@ -319,6 +298,124 @@ class My_Catalog_Product_Table {
 	}
 
 	/**
+	 * Renders the product filters shortcode.
+	 *
+	 * @param array<string, mixed> $atts Shortcode attributes.
+	 * @return string
+	 */
+	public function render_filters_shortcode( $atts ) {
+		$atts = shortcode_atts(
+			array(
+				'target'        => '',
+				'show_category' => 'true',
+				'show_price'    => 'true',
+			),
+			$atts,
+			'product_filters'
+		);
+
+		wp_enqueue_style( 'my-catalog-product-table' );
+		wp_enqueue_script( 'my-catalog-product-table' );
+
+		return $this->render_filter_controls(
+			array(
+				'target'        => sanitize_html_class( $atts['target'] ),
+				'show_category' => filter_var( $atts['show_category'], FILTER_VALIDATE_BOOLEAN ),
+				'show_price'    => filter_var( $atts['show_price'], FILTER_VALIDATE_BOOLEAN ),
+				'external'      => true,
+			)
+		);
+	}
+
+	/**
+	 * Renders the product filters block.
+	 *
+	 * @param array<string, mixed> $attributes Block attributes.
+	 * @return string
+	 */
+	public function render_filters_block( $attributes ) {
+		return $this->render_filters_shortcode(
+			array(
+				'target'        => isset( $attributes['target'] ) ? $attributes['target'] : '',
+				'show_category' => empty( $attributes['showCategory'] ) ? 'false' : 'true',
+				'show_price'    => empty( $attributes['showPrice'] ) ? 'false' : 'true',
+			)
+		);
+	}
+
+	/**
+	 * Renders reusable product filter controls.
+	 *
+	 * @param array<string, mixed> $args Filter arguments.
+	 * @return string
+	 */
+	private function render_filter_controls( $args = array() ) {
+		$args = wp_parse_args(
+			$args,
+			array(
+				'target'        => '',
+				'show_category' => true,
+				'show_price'    => true,
+				'external'      => false,
+			)
+		);
+
+		$classes = 'my-catalog-product-table__filters';
+
+		if ( ! empty( $args['external'] ) ) {
+			$classes .= ' my-catalog-product-filters';
+		}
+
+		$price_bounds = $this->get_price_filter_bounds();
+
+		ob_start();
+		?>
+		<div class="<?php echo esc_attr( $classes ); ?>" <?php echo ! empty( $args['target'] ) ? 'data-target="' . esc_attr( $args['target'] ) . '"' : ''; ?>>
+			<?php if ( ! empty( $args['show_category'] ) ) : ?>
+				<label class="my-catalog-product-table__filter">
+					<span><?php esc_html_e( 'Category', 'my-catalog' ); ?></span>
+					<select class="js-my-catalog-product-category">
+						<option value=""><?php esc_html_e( 'All categories', 'my-catalog' ); ?></option>
+						<?php foreach ( $this->get_terms_for_filter( My_Catalog_Core::PRODUCT_CATEGORY_TAXONOMY ) as $term ) : ?>
+							<option value="<?php echo esc_attr( $term->slug ); ?>"><?php echo esc_html( $term->name ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</label>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $args['show_price'] ) ) : ?>
+				<div
+					class="my-catalog-product-table__filter my-catalog-product-table__filter--price-range js-my-catalog-product-price-range"
+					data-min="<?php echo esc_attr( $price_bounds['min'] ); ?>"
+					data-max="<?php echo esc_attr( $price_bounds['max'] ); ?>"
+					data-step="0.01"
+				>
+					<span><?php esc_html_e( 'Price', 'my-catalog' ); ?></span>
+					<div class="my-catalog-product-table__price-fields">
+						<label>
+							<span><?php esc_html_e( 'Min', 'my-catalog' ); ?></span>
+							<input class="js-my-catalog-product-price-min" type="number" min="<?php echo esc_attr( $price_bounds['min'] ); ?>" max="<?php echo esc_attr( $price_bounds['max'] ); ?>" step="0.01" inputmode="decimal" value="<?php echo esc_attr( $price_bounds['min'] ); ?>" />
+						</label>
+						<label>
+							<span><?php esc_html_e( 'Max', 'my-catalog' ); ?></span>
+							<input class="js-my-catalog-product-price-max" type="number" min="<?php echo esc_attr( $price_bounds['min'] ); ?>" max="<?php echo esc_attr( $price_bounds['max'] ); ?>" step="0.01" inputmode="decimal" value="<?php echo esc_attr( $price_bounds['max'] ); ?>" />
+						</label>
+					</div>
+					<div class="my-catalog-product-table__range-slider">
+						<div class="my-catalog-product-table__range-track"></div>
+						<input class="js-my-catalog-product-price-min-range" type="range" min="<?php echo esc_attr( $price_bounds['min'] ); ?>" max="<?php echo esc_attr( $price_bounds['max'] ); ?>" step="0.01" value="<?php echo esc_attr( $price_bounds['min'] ); ?>" aria-label="<?php esc_attr_e( 'Minimum price', 'my-catalog' ); ?>" />
+						<input class="js-my-catalog-product-price-max-range" type="range" min="<?php echo esc_attr( $price_bounds['min'] ); ?>" max="<?php echo esc_attr( $price_bounds['max'] ); ?>" step="0.01" value="<?php echo esc_attr( $price_bounds['max'] ); ?>" aria-label="<?php esc_attr_e( 'Maximum price', 'my-catalog' ); ?>" />
+					</div>
+				</div>
+			<?php endif; ?>
+
+		</div>
+		<?php
+
+		return (string) ob_get_clean();
+	}
+
+	/**
 	 * Handles product table REST requests.
 	 *
 	 * @param WP_REST_Request $request REST request.
@@ -331,6 +428,8 @@ class My_Catalog_Product_Table {
 		$search_term       = sanitize_text_field( (string) $request->get_param( 'search' ) );
 		$filter_category   = sanitize_text_field( (string) $request->get_param( 'category' ) );
 		$filter_tag        = sanitize_text_field( (string) $request->get_param( 'tag' ) );
+		$filter_price_min  = $this->sanitize_price_filter_value( $request->get_param( 'price_min' ) );
+		$filter_price_max  = $this->sanitize_price_filter_value( $request->get_param( 'price_max' ) );
 		$base_category     = sanitize_text_field( (string) $request->get_param( 'base_category' ) );
 		$base_tag          = sanitize_text_field( (string) $request->get_param( 'base_tag' ) );
 		$length            = max( 1, absint( $request->get_param( 'length' ) ) );
@@ -345,6 +444,8 @@ class My_Catalog_Product_Table {
 				'base_tag'        => $base_tag,
 				'filter_category' => '',
 				'filter_tag'      => '',
+				'filter_price_min' => null,
+				'filter_price_max' => null,
 				'search'          => '',
 				'posts_per_page'  => 1,
 				'offset'          => 0,
@@ -357,6 +458,8 @@ class My_Catalog_Product_Table {
 				'base_tag'        => $base_tag,
 				'filter_category' => $filter_category,
 				'filter_tag'      => $filter_tag,
+				'filter_price_min' => $filter_price_min,
+				'filter_price_max' => $filter_price_max,
 				'search'          => $search_term,
 				'posts_per_page'  => $length,
 				'offset'          => $start,
@@ -476,6 +579,15 @@ class My_Catalog_Product_Table {
 
 		if ( ! empty( $tax_query ) ) {
 			$query_args['tax_query'] = $tax_query;
+		}
+
+		$meta_query = $this->build_meta_query(
+			isset( $args['filter_price_min'] ) ? $args['filter_price_min'] : null,
+			isset( $args['filter_price_max'] ) ? $args['filter_price_max'] : null
+		);
+
+		if ( ! empty( $meta_query ) ) {
+			$query_args['meta_query'] = $meta_query;
 		}
 
 		$order_column = ! empty( $args['order_column'] ) ? $args['order_column'] : 'title';
@@ -605,6 +717,67 @@ class My_Catalog_Product_Table {
 	}
 
 	/**
+	 * Builds a meta query from active UI filters.
+	 *
+	 * @param float|null $filter_price_min Active minimum price filter.
+	 * @param float|null $filter_price_max Active maximum price filter.
+	 * @return array<int|string, array<string, mixed>|string>
+	 */
+	private function build_meta_query( $filter_price_min, $filter_price_max ) {
+		$meta_query = array();
+
+		if ( null !== $filter_price_min && null !== $filter_price_max && $filter_price_min > $filter_price_max ) {
+			$swap             = $filter_price_min;
+			$filter_price_min = $filter_price_max;
+			$filter_price_max = $swap;
+		}
+
+		if ( null !== $filter_price_min ) {
+			$meta_query[] = array(
+				'key'     => My_Catalog_Core::PRODUCT_META_PRICE,
+				'value'   => $filter_price_min,
+				'compare' => '>=',
+				'type'    => 'NUMERIC',
+			);
+		}
+
+		if ( null !== $filter_price_max ) {
+			$meta_query[] = array(
+				'key'     => My_Catalog_Core::PRODUCT_META_PRICE,
+				'value'   => $filter_price_max,
+				'compare' => '<=',
+				'type'    => 'NUMERIC',
+			);
+		}
+
+		if ( count( $meta_query ) > 1 ) {
+			$meta_query['relation'] = 'AND';
+		}
+
+		return $meta_query;
+	}
+
+	/**
+	 * Sanitizes a submitted price filter value.
+	 *
+	 * @param mixed $value Submitted value.
+	 * @return float|null
+	 */
+	private function sanitize_price_filter_value( $value ) {
+		if ( null === $value || '' === $value ) {
+			return null;
+		}
+
+		$value = is_string( $value ) ? str_replace( ',', '.', $value ) : $value;
+
+		if ( ! is_numeric( $value ) ) {
+			return null;
+		}
+
+		return max( 0, (float) $value );
+	}
+
+	/**
 	 * Returns sortable mappings for DataTables columns.
 	 *
 	 * @return array<string, array<string, string>>
@@ -648,6 +821,39 @@ class My_Catalog_Product_Table {
 		);
 
 		return is_array( $terms ) ? $terms : array();
+	}
+
+	/**
+	 * Returns min and max prices for the range filter.
+	 *
+	 * @return array{min: float, max: float}
+	 */
+	private function get_price_filter_bounds() {
+		global $wpdb;
+
+		$bounds = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT MIN(CAST(meta_value AS DECIMAL(20, 4))) AS min_price, MAX(CAST(meta_value AS DECIMAL(20, 4))) AS max_price
+				FROM {$wpdb->postmeta}
+				WHERE meta_key = %s
+					AND meta_value != ''
+					AND meta_value REGEXP '^[0-9]+(\\\\.[0-9]+)?$'",
+				My_Catalog_Core::PRODUCT_META_PRICE
+			),
+			ARRAY_A
+		);
+
+		$min = isset( $bounds['min_price'] ) ? floor( (float) $bounds['min_price'] ) : 0;
+		$max = isset( $bounds['max_price'] ) ? ceil( (float) $bounds['max_price'] ) : 0;
+
+		if ( $max <= $min ) {
+			$max = $min + 1;
+		}
+
+		return array(
+			'min' => $min,
+			'max' => $max,
+		);
 	}
 
 	/**
