@@ -9,6 +9,10 @@
 	margin-bottom: 1rem;
 }
 
+.my-catalog-product-filters {
+	margin: 2rem 0 1rem;
+}
+
 .my-catalog-product-table__filter {
 	display: flex;
 	flex-direction: column;

@@ -30,6 +30,7 @@ class My_Catalog_Product_Table {
 	 */
 	public function __construct() {
 		add_shortcode( 'product_table', array( $this, 'render_shortcode' ) );
+		add_shortcode( 'product_filters', array( $this, 'render_filters_shortcode' ) );
 		add_shortcode( 'my_catalog_price', array( $this, 'render_price_shortcode' ) );
 		add_shortcode( 'my_catalog_stock', array( $this, 'render_stock_shortcode' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_assets' ) );
@@ -246,6 +247,7 @@ class My_Catalog_Product_Table {
 				'show_filters'  => 'true',
 				'search'        => 'true',
 				'empty_message' => __( 'No products found.', 'my-catalog' ),
+				'table_id'      => '',
 			),
 			$atts,
 			'product_table'
@@ -253,7 +255,8 @@ class My_Catalog_Product_Table {
 
 		$column_keys = $this->parse_columns_attribute( $atts['columns'] );
 		$columns     = $this->prepare_columns_for_frontend( $column_keys );
-		$instance_id = 'my-catalog-product-table-' . ++self::$instance;
+		$table_id    = sanitize_html_class( $atts['table_id'] );
+		$instance_id = $table_id ? $table_id : 'my-catalog-product-table-' . ++self::$instance;
 
 		wp_enqueue_style( 'my-catalog-product-table' );
 		wp_enqueue_script( 'my-catalog-product-table' );
@@ -272,26 +275,7 @@ class My_Catalog_Product_Table {
 		?>
 		<div class="my-catalog-product-table" id="<?php echo esc_attr( $instance_id ); ?>" data-config="<?php echo esc_attr( wp_json_encode( $config ) ); ?>">
 			<?php if ( filter_var( $atts['show_filters'], FILTER_VALIDATE_BOOLEAN ) ) : ?>
-				<div class="my-catalog-product-table__filters">
-					<label class="my-catalog-product-table__filter">
-						<span><?php esc_html_e( 'Category', 'my-catalog' ); ?></span>
-						<select class="js-my-catalog-product-category">
-							<option value=""><?php esc_html_e( 'All categories', 'my-catalog' ); ?></option>
-							<?php foreach ( $this->get_terms_for_filter( My_Catalog_Core::PRODUCT_CATEGORY_TAXONOMY ) as $term ) : ?>
-								<option value="<?php echo esc_attr( $term->slug ); ?>"><?php echo esc_html( $term->name ); ?></option>
-							<?php endforeach; ?>
-						</select>
-					</label>
-					<label class="my-catalog-product-table__filter">
-						<span><?php esc_html_e( 'Attribute', 'my-catalog' ); ?></span>
-						<select class="js-my-catalog-product-tag">
-							<option value=""><?php esc_html_e( 'All attributes', 'my-catalog' ); ?></option>
-							<?php foreach ( $this->get_terms_for_filter( My_Catalog_Core::PRODUCT_TAG_TAXONOMY ) as $term ) : ?>
-								<option value="<?php echo esc_attr( $term->slug ); ?>"><?php echo esc_html( $term->name ); ?></option>
-							<?php endforeach; ?>
-						</select>
-					</label>
-				</div>
+				<?php echo $this->render_filter_controls(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<?php endif; ?>
 
 			<div class="my-catalog-product-table__frame">
@@ -312,6 +296,107 @@ class My_Catalog_Product_Table {
 					</tbody>
 				</table>
 			</div>
+		</div>
+		<?php
+
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Renders the product filters shortcode.
+	 *
+	 * @param array<string, mixed> $atts Shortcode attributes.
+	 * @return string
+	 */
+	public function render_filters_shortcode( $atts ) {
+		$atts = shortcode_atts(
+			array(
+				'target'          => '',
+				'show_category'   => 'true',
+				'show_attributes' => 'true',
+			),
+			$atts,
+			'product_filters'
+		);
+
+		wp_enqueue_style( 'my-catalog-product-table' );
+		wp_enqueue_script( 'my-catalog-product-table' );
+
+		return $this->render_filter_controls(
+			array(
+				'target'          => sanitize_html_class( $atts['target'] ),
+				'show_category'   => filter_var( $atts['show_category'], FILTER_VALIDATE_BOOLEAN ),
+				'show_attributes' => filter_var( $atts['show_attributes'], FILTER_VALIDATE_BOOLEAN ),
+				'external'        => true,
+			)
+		);
+	}
+
+	/**
+	 * Renders the product filters block.
+	 *
+	 * @param array<string, mixed> $attributes Block attributes.
+	 * @return string
+	 */
+	public function render_filters_block( $attributes ) {
+		return $this->render_filters_shortcode(
+			array(
+				'target'          => isset( $attributes['target'] ) ? $attributes['target'] : '',
+				'show_category'   => empty( $attributes['showCategory'] ) ? 'false' : 'true',
+				'show_attributes' => empty( $attributes['showAttributes'] ) ? 'false' : 'true',
+			)
+		);
+	}
+
+	/**
+	 * Renders reusable product filter controls.
+	 *
+	 * @param array<string, mixed> $args Filter arguments.
+	 * @return string
+	 */
+	private function render_filter_controls( $args = array() ) {
+		$args = wp_parse_args(
+			$args,
+			array(
+				'target'          => '',
+				'show_category'   => true,
+				'show_attributes' => true,
+				'external'        => false,
+			)
+		);
+
+		$classes = 'my-catalog-product-table__filters';
+
+		if ( ! empty( $args['external'] ) ) {
+			$classes .= ' my-catalog-product-filters';
+		}
+
+		ob_start();
+		?>
+		<div class="<?php echo esc_attr( $classes ); ?>" <?php echo ! empty( $args['target'] ) ? 'data-target="' . esc_attr( $args['target'] ) . '"' : ''; ?>>
+			<?php if ( ! empty( $args['show_category'] ) ) : ?>
+				<label class="my-catalog-product-table__filter">
+					<span><?php esc_html_e( 'Category', 'my-catalog' ); ?></span>
+					<select class="js-my-catalog-product-category">
+						<option value=""><?php esc_html_e( 'All categories', 'my-catalog' ); ?></option>
+						<?php foreach ( $this->get_terms_for_filter( My_Catalog_Core::PRODUCT_CATEGORY_TAXONOMY ) as $term ) : ?>
+							<option value="<?php echo esc_attr( $term->slug ); ?>"><?php echo esc_html( $term->name ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</label>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $args['show_attributes'] ) ) : ?>
+				<label class="my-catalog-product-table__filter">
+					<span><?php esc_html_e( 'Attribute', 'my-catalog' ); ?></span>
+					<select class="js-my-catalog-product-tag">
+						<option value=""><?php esc_html_e( 'All attributes', 'my-catalog' ); ?></option>
+						<?php foreach ( $this->get_terms_for_filter( My_Catalog_Core::PRODUCT_TAG_TAXONOMY ) as $term ) : ?>
+							<option value="<?php echo esc_attr( $term->slug ); ?>"><?php echo esc_html( $term->name ); ?></option>
+						<?php endforeach; ?>
+					</select>
+				</label>
+			<?php endif; ?>
 		</div>
 		<?php
 

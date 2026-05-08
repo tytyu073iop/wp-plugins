@@ -15,6 +15,20 @@
 		}
 	}
 
+	function getFilterValue( $fields ) {
+		let value = '';
+
+		$fields.each( function () {
+			const nextValue = $( this ).val();
+
+			if ( nextValue ) {
+				value = nextValue;
+			}
+		} );
+
+		return value;
+	}
+
 	$( function () {
 		$( '.my-catalog-product-table' ).each( function () {
 			const wrapper = this;
@@ -26,8 +40,15 @@
 
 			const $wrapper = $( wrapper );
 			const $table = $wrapper.find( 'table' );
-			const $category = $wrapper.find( '.js-my-catalog-product-category' );
-			const $tag = $wrapper.find( '.js-my-catalog-product-tag' );
+			const $internalFilters = $wrapper.find( '.my-catalog-product-table__filters' );
+			const $externalFilters = $( '.my-catalog-product-filters' ).filter( function () {
+				const target = $( this ).data( 'target' );
+
+				return ! target || target === wrapper.id;
+			} );
+			const $filters = $internalFilters.add( $externalFilters );
+			const $category = $filters.find( '.js-my-catalog-product-category' );
+			const $tag = $filters.find( '.js-my-catalog-product-tag' );
 			const columns = ( config.columns || [] ).map( function ( column ) {
 				return {
 					data: column.key,
@@ -60,8 +81,8 @@
 							search: data.search ? data.search.value : '',
 							order_column: orderColumn,
 							order_dir: order.dir || 'asc',
-							category: $category.val() || '',
-							tag: $tag.val() || '',
+							category: getFilterValue( $category ),
+							tag: getFilterValue( $tag ),
 							base_category: config.baseCategory || '',
 							base_tag: config.baseTag || '',
 							columns: columns.map( function ( column ) {

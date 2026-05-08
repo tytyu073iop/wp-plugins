@@ -81,13 +81,23 @@ final class My_Catalog_Plugin {
 	 * @return void
 	 */
 	public function register_block() {
-		$block_dir = MY_CATALOG_PATH;
+		$block_dir         = MY_CATALOG_PATH;
+		$product_filter_dir = MY_CATALOG_PATH . 'blocks/product-filters';
 
 		if ( file_exists( $block_dir . '/block.json' ) ) {
 			register_block_type(
 				$block_dir,
 				array(
 					'render_callback' => array( $this->news_carousel, 'render_block' ),
+				)
+			);
+		}
+
+		if ( file_exists( $product_filter_dir . '/block.json' ) ) {
+			register_block_type(
+				$product_filter_dir,
+				array(
+					'render_callback' => array( $this->product_table, 'render_filters_block' ),
 				)
 			);
 		}
