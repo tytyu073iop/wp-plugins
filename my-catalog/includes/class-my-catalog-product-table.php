@@ -229,6 +229,25 @@ class My_Catalog_Product_Table {
 				'permission_callback' => '__return_true',
 			)
 		);
+
+		register_rest_route(
+			'my-catalog/v1',
+			'/price-bounds',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'handle_price_bounds_request' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+
+	/**
+	 * Returns min and max product prices for the price range filter.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function handle_price_bounds_request() {
+		return rest_ensure_response( $this->get_price_filter_bounds() );
 	}
 
 	/**

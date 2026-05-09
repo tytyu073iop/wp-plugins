@@ -1,31 +1,31 @@
 {
-  "$schema": "https://schemas.wp.org/trunk/block.json",
-  "apiVersion": 3,
-  "name": "my-catalog/product-filters",
-  "version": "0.1.0",
-  "title": "Product Filters",
-  "category": "widgets",
-  "icon": "filter",
-  "description": "Display product filters for a product table.",
-  "textdomain": "my-catalog",
-  "editorScript": "file:../../build/index.js",
-  "editorStyle": "file:../../build/index.css",
-  "style": "file:../../build/style-index.css",
-  "supports": {
-    "html": false
-  },
-  "attributes": {
-    "target": {
-      "type": "string",
-      "default": ""
-    },
-    "showCategory": {
-      "type": "boolean",
-      "default": true
-    },
-    "showPrice": {
-      "type": "boolean",
-      "default": true
-    }
-  }
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "my-catalog/product-filters",
+	"version": "0.1.0",
+	"title": "Product Filters",
+	"category": "widgets",
+	"icon": "filter",
+	"description": "Display product filters for a product table.",
+	"textdomain": "my-catalog",
+	"editorScript": "file:../../build/index.js",
+	"editorStyle": "file:../../build/index.css",
+	"style": "file:../../build/style-index.css",
+	"supports": {
+		"html": false
+	},
+	"attributes": {
+		"target": {
+			"type": "string",
+			"default": ""
+		},
+		"showCategory": {
+			"type": "boolean",
+			"default": true
+		},
+		"showPrice": {
+			"type": "boolean",
+			"default": true
+		}
+	}
 }

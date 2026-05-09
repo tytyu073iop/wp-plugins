@@ -42,8 +42,14 @@
 	function updatePriceRangeTrack( $range ) {
 		const minBound = toNumber( $range.data( 'min' ), 0 );
 		const maxBound = toNumber( $range.data( 'max' ), minBound + 1 );
-		const minValue = toNumber( $range.find( '.js-my-catalog-product-price-min-range' ).val(), minBound );
-		const maxValue = toNumber( $range.find( '.js-my-catalog-product-price-max-range' ).val(), maxBound );
+		const minValue = toNumber(
+			$range.find( '.js-my-catalog-product-price-min-range' ).val(),
+			minBound
+		);
+		const maxValue = toNumber(
+			$range.find( '.js-my-catalog-product-price-max-range' ).val(),
+			maxBound
+		);
 		const span = maxBound - minBound || 1;
 		const left = ( ( minValue - minBound ) / span ) * 100;
 		const right = 100 - ( ( maxValue - minBound ) / span ) * 100;
@@ -59,8 +65,12 @@
 		const maxBound = toNumber( $range.data( 'max' ), minBound + 1 );
 		const $minField = $range.find( '.js-my-catalog-product-price-min' );
 		const $maxField = $range.find( '.js-my-catalog-product-price-max' );
-		const $minRange = $range.find( '.js-my-catalog-product-price-min-range' );
-		const $maxRange = $range.find( '.js-my-catalog-product-price-max-range' );
+		const $minRange = $range.find(
+			'.js-my-catalog-product-price-min-range'
+		);
+		const $maxRange = $range.find(
+			'.js-my-catalog-product-price-max-range'
+		);
 		let minValue = toNumber( $minField.val(), minBound );
 		let maxValue = toNumber( $maxField.val(), maxBound );
 
@@ -95,7 +105,9 @@
 
 		$fields.each( function () {
 			const $field = $( this );
-			const $range = $field.closest( '.js-my-catalog-product-price-range' );
+			const $range = $field.closest(
+				'.js-my-catalog-product-price-range'
+			);
 			const bound = toNumber( $range.data( boundName ), 0 );
 			const nextValue = toNumber( $field.val(), bound );
 
@@ -118,17 +130,29 @@
 
 			const $wrapper = $( wrapper );
 			const $table = $wrapper.find( 'table' );
-			const $internalFilters = $wrapper.find( '.my-catalog-product-table__filters' );
-			const $externalFilters = $( '.my-catalog-product-filters' ).filter( function () {
-				const target = $( this ).data( 'target' );
+			const $internalFilters = $wrapper.find(
+				'.my-catalog-product-table__filters'
+			);
+			const $externalFilters = $( '.my-catalog-product-filters' ).filter(
+				function () {
+					const target = $( this ).data( 'target' );
 
-				return ! target || target === wrapper.id;
-			} );
+					return ! target || target === wrapper.id;
+				}
+			);
 			const $filters = $internalFilters.add( $externalFilters );
-			const $category = $filters.find( '.js-my-catalog-product-category' );
-			const $priceMin = $filters.find( '.js-my-catalog-product-price-min' );
-			const $priceMax = $filters.find( '.js-my-catalog-product-price-max' );
-			const $priceRanges = $filters.find( '.js-my-catalog-product-price-range' );
+			const $category = $filters.find(
+				'.js-my-catalog-product-category'
+			);
+			const $priceMin = $filters.find(
+				'.js-my-catalog-product-price-min'
+			);
+			const $priceMax = $filters.find(
+				'.js-my-catalog-product-price-max'
+			);
+			const $priceRanges = $filters.find(
+				'.js-my-catalog-product-price-range'
+			);
 			const columns = ( config.columns || [] ).map( function ( column ) {
 				return {
 					data: column.key,
@@ -151,8 +175,13 @@
 					url: config.restUrl || myCatalogProductTable.restUrl,
 					type: 'GET',
 					data: function ( data ) {
-						const order = data.order && data.order[ 0 ] ? data.order[ 0 ] : { column: 0, dir: 'asc' };
-						const orderColumn = columns[ order.column ] ? columns[ order.column ].name : 'title';
+						const order =
+							data.order && data.order[ 0 ]
+								? data.order[ 0 ]
+								: { column: 0, dir: 'asc' };
+						const orderColumn = columns[ order.column ]
+							? columns[ order.column ].name
+							: 'title';
 
 						return {
 							draw: data.draw,
@@ -177,7 +206,11 @@
 			} );
 
 			$table.on( 'click', 'tbody tr', function ( event ) {
-				if ( $( event.target ).closest( 'a, button, input, select, textarea' ).length ) {
+				if (
+					$( event.target ).closest(
+						'a, button, input, select, textarea'
+					).length
+				) {
 					return;
 				}
 
@@ -200,19 +233,30 @@
 				const $field = $( this );
 				let changedField = '';
 
-				if ( $field.hasClass( 'js-my-catalog-product-price-min-range' ) ) {
+				if (
+					$field.hasClass( 'js-my-catalog-product-price-min-range' )
+				) {
 					changedField = 'min-range';
-				} else if ( $field.hasClass( 'js-my-catalog-product-price-max-range' ) ) {
+				} else if (
+					$field.hasClass( 'js-my-catalog-product-price-max-range' )
+				) {
 					changedField = 'max-range';
-				} else if ( $field.hasClass( 'js-my-catalog-product-price-min' ) ) {
+				} else if (
+					$field.hasClass( 'js-my-catalog-product-price-min' )
+				) {
 					changedField = 'min-field';
-				} else if ( $field.hasClass( 'js-my-catalog-product-price-max' ) ) {
+				} else if (
+					$field.hasClass( 'js-my-catalog-product-price-max' )
+				) {
 					changedField = 'max-field';
 				}
 
-				syncPriceRange( $field.closest( '.js-my-catalog-product-price-range' ), changedField );
+				syncPriceRange(
+					$field.closest( '.js-my-catalog-product-price-range' ),
+					changedField
+				);
 				table.ajax.reload();
 			} );
 		} );
 	} );
-}( jQuery ) );
+} )( jQuery );
