@@ -53,7 +53,7 @@ function NewsCarouselEdit( { attributes, setAttributes } ) {
 		);
 		apiFetch( {
 			path: addQueryArgs( '/wp/v2/news', {
-				per_page: limit,
+				per_page: 1,
 				_embed: true,
 				orderby: 'date',
 				order: 'desc',
