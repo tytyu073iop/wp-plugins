@@ -678,16 +678,16 @@ class My_Catalog_Product_Table {
 
 		$clauses['where'] .= $wpdb->prepare(
 			" AND (
-				{$wpdb->posts}.post_title LIKE %1\$s
-				OR {$wpdb->posts}.post_content LIKE %1\$s
-				OR {$wpdb->posts}.post_excerpt LIKE %1\$s
+				{$wpdb->posts}.post_title LIKE '%1\$s'
+				OR {$wpdb->posts}.post_content LIKE '%1\$s'
+				OR {$wpdb->posts}.post_excerpt LIKE '%1\$s'
 				OR (
-					my_catalog_meta_search.meta_key IN (%2\$s, %3\$s, %4\$s, %5\$s)
-					AND my_catalog_meta_search.meta_value LIKE %1\$s
+					my_catalog_meta_search.meta_key IN ('%2\$s', '%3\$s', '%4\$s', '%5\$s')
+					AND my_catalog_meta_search.meta_value LIKE '%1\$s'
 				)
 				OR (
-					my_catalog_term_taxonomy.taxonomy IN (%6\$s, %7\$s)
-					AND my_catalog_terms.name LIKE %1\$s
+					my_catalog_term_taxonomy.taxonomy IN ('%6\$s', '%7\$s')
+					AND my_catalog_terms.name LIKE '%1\$s'
 				)
 			)",
 			$like,
