@@ -41,6 +41,13 @@ class My_Catalog_News_Carousel {
 			'11.1.4'
 		);
 
+		wp_register_style(
+			'my-catalog-news-carousel',
+			MY_CATALOG_URL . 'assets/css/news-carousel.css',
+			array( 'my-catalog-swiper' ),
+			MY_CATALOG_VERSION
+		);
+
 		wp_register_script(
 			'my-catalog-swiper',
 			'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js',
@@ -125,6 +132,7 @@ class My_Catalog_News_Carousel {
 		}
 
 		wp_enqueue_style( 'my-catalog-swiper' );
+		wp_enqueue_style( 'my-catalog-news-carousel' );
 		wp_enqueue_script( 'my-catalog-news-carousel' );
 
 		$instance_id = 'my-catalog-news-carousel-' . ++self::$instance;
