@@ -93,9 +93,7 @@ function NewsCarouselEdit( { attributes, setAttributes } ) {
 							const imageUrl =
 								post._embedded?.[ 'wp:featuredmedia' ]?.[ 0 ]
 									?.source_url;
-							const link =
-								post.meta?._my_catalog_read_more_url ||
-								post.link;
+							const link = post.link;
 							return (
 								<article
 									key={ post.id }
@@ -471,7 +469,6 @@ function ProductTableEdit( { attributes, setAttributes } ) {
 		sku: __( 'SKU', 'my-catalog' ),
 		stock: __( 'Availability', 'my-catalog' ),
 		weight: __( 'Weight', 'my-catalog' ),
-		external: __( 'Buy', 'my-catalog' ),
 	};
 
 	const parsedColumns = columns
@@ -625,7 +622,7 @@ function ProductTableEdit( { attributes, setAttributes } ) {
 							setAttributes( { columns: nextValue } )
 						}
 						help={ __(
-							'Leave empty to use defaults from Settings > My Catalog. Options: image, title, price, category, attributes, sku, stock, weight, external.',
+							'Leave empty to use defaults from Settings > My Catalog. Options: image, title, price, category, attributes, sku, stock, weight.',
 							'my-catalog'
 						) }
 					/>

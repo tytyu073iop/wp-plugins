@@ -179,8 +179,7 @@ class My_Catalog_News_Carousel {
 	 */
 	private function render_slide( WP_Post $post ) {
 		$template = $this->locate_slide_template();
-		$link     = get_post_meta( $post->ID, My_Catalog_Core::NEWS_META_READ_MORE_URL, true );
-		$link     = $link ? $link : get_permalink( $post );
+		$link     = get_permalink( $post );
 		$excerpt  = has_excerpt( $post ) ? $post->post_excerpt : wp_trim_words( wp_strip_all_tags( $post->post_content ), 24 );
 		$data     = array(
 			'post'        => $post,

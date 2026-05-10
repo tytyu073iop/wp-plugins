@@ -59,23 +59,12 @@ class My_Catalog_Core {
 	const PRODUCT_META_WEIGHT = '_my_catalog_weight';
 
 	/**
-	 * Product external URL meta key.
-	 */
-	const PRODUCT_META_EXTERNAL_URL = '_my_catalog_external_url';
-
-	/**
-	 * News read more URL meta key.
-	 */
-	const NEWS_META_READ_MORE_URL = '_my_catalog_read_more_url';
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		add_action( 'init', array( __CLASS__, 'register_content_types' ) );
 		add_action( 'add_meta_boxes', array( $this, 'register_meta_boxes' ) );
 		add_action( 'save_post_' . self::PRODUCT_POST_TYPE, array( $this, 'save_product_meta' ) );
-		add_action( 'save_post_' . self::NEWS_POST_TYPE, array( $this, 'save_news_meta' ) );
 	}
 
 	/**
@@ -180,19 +169,6 @@ class My_Catalog_Core {
 			)
 		);
 
-		register_post_meta(
-			self::NEWS_POST_TYPE,
-			'_my_catalog_read_more_url',
-			array(
-				'type'          => 'string',
-				'description'   => 'Custom read more URL for news items.',
-				'single'        => true,
-				'show_in_rest'  => true,
-				'auth_callback' => function () {
-					return current_user_can( 'edit_posts' );
-				},
-			)
-		);
 	}
 
 	/**
@@ -206,15 +182,6 @@ class My_Catalog_Core {
 			__( 'Product Details', 'my-catalog' ),
 			array( $this, 'render_product_meta_box' ),
 			self::PRODUCT_POST_TYPE,
-			'normal',
-			'default'
-		);
-
-		add_meta_box(
-			'my-catalog-news-details',
-			__( 'News Details', 'my-catalog' ),
-			array( $this, 'render_news_meta_box' ),
-			self::NEWS_POST_TYPE,
 			'normal',
 			'default'
 		);
@@ -233,7 +200,6 @@ class My_Catalog_Core {
 		$sku          = get_post_meta( $post->ID, self::PRODUCT_META_SKU, true );
 		$stock_status = get_post_meta( $post->ID, self::PRODUCT_META_STOCK, true );
 		$weight       = get_post_meta( $post->ID, self::PRODUCT_META_WEIGHT, true );
-		$external_url = get_post_meta( $post->ID, self::PRODUCT_META_EXTERNAL_URL, true );
 		$stock_map    = self::get_stock_statuses();
 		?>
 		<table class="form-table" role="presentation">
@@ -277,41 +243,6 @@ class My_Catalog_Core {
 						<input type="text" class="regular-text" id="my-catalog-weight" name="my_catalog_weight" value="<?php echo esc_attr( $weight ); ?>" />
 					</td>
 				</tr>
-				<tr>
-					<th scope="row">
-						<label for="my-catalog-external-url"><?php esc_html_e( 'External Store URL', 'my-catalog' ); ?></label>
-					</th>
-					<td>
-						<input type="url" class="regular-text" id="my-catalog-external-url" name="my_catalog_external_url" value="<?php echo esc_attr( $external_url ); ?>" />
-					</td>
-				</tr>
-			</tbody>
-		</table>
-		<?php
-	}
-
-	/**
-	 * Renders the news details meta box.
-	 *
-	 * @param WP_Post $post Current post.
-	 * @return void
-	 */
-	public function render_news_meta_box( $post ) {
-		wp_nonce_field( 'my_catalog_save_news_meta', 'my_catalog_news_meta_nonce' );
-
-		$read_more_url = get_post_meta( $post->ID, self::NEWS_META_READ_MORE_URL, true );
-		?>
-		<table class="form-table" role="presentation">
-			<tbody>
-				<tr>
-					<th scope="row">
-						<label for="my-catalog-news-read-more-url"><?php esc_html_e( 'Read More URL', 'my-catalog' ); ?></label>
-					</th>
-					<td>
-						<input type="url" class="regular-text" id="my-catalog-news-read-more-url" name="my_catalog_read_more_url" value="<?php echo esc_attr( $read_more_url ); ?>" />
-						<p class="description"><?php esc_html_e( 'Use an internal site link for the detailed news page.', 'my-catalog' ); ?></p>
-					</td>
-				</tr>
 			</tbody>
 		</table>
 		<?php
@@ -335,21 +266,6 @@ class My_Catalog_Core {
 		update_post_meta( $post_id, self::PRODUCT_META_SKU, isset( $_POST['my_catalog_sku'] ) ? sanitize_text_field( wp_unslash( $_POST['my_catalog_sku'] ) ) : '' );
 		update_post_meta( $post_id, self::PRODUCT_META_STOCK, isset( $stock_map[ $stock_status ] ) ? $stock_status : 'in_stock' );
 		update_post_meta( $post_id, self::PRODUCT_META_WEIGHT, $this->sanitize_decimal_field( 'my_catalog_weight' ) );
-		update_post_meta( $post_id, self::PRODUCT_META_EXTERNAL_URL, isset( $_POST['my_catalog_external_url'] ) ? esc_url_raw( wp_unslash( $_POST['my_catalog_external_url'] ) ) : '' );
-	}
-
-	/**
-	 * Saves news meta box fields.
-	 *
-	 * @param int $post_id Post ID.
-	 * @return void
-	 */
-	public function save_news_meta( $post_id ) {
-		if ( ! $this->can_save_post( $post_id, 'my_catalog_news_meta_nonce', 'my_catalog_save_news_meta' ) ) {
-			return;
-		}
-
-		update_post_meta( $post_id, self::NEWS_META_READ_MORE_URL, isset( $_POST['my_catalog_read_more_url'] ) ? esc_url_raw( wp_unslash( $_POST['my_catalog_read_more_url'] ) ) : '' );
 	}
 
 	/**

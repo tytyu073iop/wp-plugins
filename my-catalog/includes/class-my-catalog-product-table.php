@@ -526,16 +526,6 @@ class My_Catalog_Product_Table {
 					$weight     = get_post_meta( $product->ID, My_Catalog_Core::PRODUCT_META_WEIGHT, true );
 					$row[ $key ] = '' !== $weight ? esc_html( $weight ) : '&mdash;';
 					break;
-				case 'external':
-					$link = get_post_meta( $product->ID, My_Catalog_Core::PRODUCT_META_EXTERNAL_URL, true );
-					$row[ $key ] = $link
-						? sprintf(
-							'<a class="my-catalog-product-table__button" href="%1$s" target="_blank" rel="noopener noreferrer">%2$s</a>',
-							esc_url( $link ),
-							esc_html__( 'Buy', 'my-catalog' )
-						)
-						: '&mdash;';
-					break;
 			}
 		}
 
@@ -971,10 +961,6 @@ class My_Catalog_Product_Table {
 			'weight'     => array(
 				'label'     => __( 'Weight', 'my-catalog' ),
 				'orderable' => true,
-			),
-			'external'   => array(
-				'label'     => __( 'Buy', 'my-catalog' ),
-				'orderable' => false,
 			),
 		);
 	}
