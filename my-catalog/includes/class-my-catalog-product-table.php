@@ -1,6 +1,6 @@
 <?php
 /**
- * Product table shortcode, settings, and REST endpoint.
+ * Product table block, settings, and REST endpoint.
  *
  * @package MyCatalog
  */
@@ -19,7 +19,7 @@ class My_Catalog_Product_Table {
 	const OPTION_COLUMNS = 'my_catalog_product_table_columns';
 
 	/**
-	 * Shortcode instance counter.
+	 * Block instance counter.
 	 *
 	 * @var int
 	 */
@@ -29,8 +29,6 @@ class My_Catalog_Product_Table {
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_shortcode( 'product_table', array( $this, 'render_shortcode' ) );
-		add_shortcode( 'product_filters', array( $this, 'render_filters_shortcode' ) );
 		add_shortcode( 'my_catalog_price', array( $this, 'render_price_shortcode' ) );
 		add_shortcode( 'my_catalog_stock', array( $this, 'render_stock_shortcode' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_assets' ) );
@@ -203,7 +201,7 @@ class My_Catalog_Product_Table {
 										</label>
 									<?php endforeach; ?>
 								</fieldset>
-								<p class="description"><?php esc_html_e( 'Shortcode attribute "columns" overrides these defaults.', 'my-catalog' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Block attribute "columns" overrides these defaults.', 'my-catalog' ); ?></p>
 							</td>
 						</tr>
 					</tbody>
@@ -251,29 +249,23 @@ class My_Catalog_Product_Table {
 	}
 
 	/**
-	 * Renders the product table shortcode.
+	 * Renders the product table block.
 	 *
-	 * @param array<string, mixed> $atts Shortcode attributes.
+	 * @param array<string, mixed> $attributes Block attributes.
 	 * @return string
 	 */
-	public function render_shortcode( $atts ) {
-		$atts = shortcode_atts(
-			array(
-				'limit'         => 10,
-				'category'      => '',
-				'tag'           => '',
-				'columns'       => '',
-				'search'        => 'true',
-				'empty_message' => __( 'No products found.', 'my-catalog' ),
-				'table_id'      => '',
-			),
-			$atts,
-			'product_table'
-		);
+	public function render_table_block( $attributes ) {
+		$limit         = isset( $attributes['limit'] ) ? $attributes['limit'] : 10;
+		$category      = isset( $attributes['category'] ) ? $attributes['category'] : '';
+		$tag           = isset( $attributes['tag'] ) ? $attributes['tag'] : '';
+		$columns_attr  = isset( $attributes['columns'] ) ? $attributes['columns'] : '';
+		$search        = ! empty( $attributes['search'] );
+		$empty_message = isset( $attributes['emptyMessage'] ) ? $attributes['emptyMessage'] : __( 'No products found.', 'my-catalog' );
+		$table_id      = isset( $attributes['tableId'] ) ? $attributes['tableId'] : '';
 
-		$column_keys = $this->parse_columns_attribute( $atts['columns'] );
+		$column_keys = $this->parse_columns_attribute( $columns_attr );
 		$columns     = $this->prepare_columns_for_frontend( $column_keys );
-		$table_id    = sanitize_html_class( $atts['table_id'] );
+		$table_id    = sanitize_html_class( $table_id );
 		$instance_id = $table_id ? $table_id : 'my-catalog-product-table-' . ++self::$instance;
 
 		wp_enqueue_style( 'my-catalog-product-table' );
@@ -281,11 +273,11 @@ class My_Catalog_Product_Table {
 
 		$config = array(
 			'restUrl'      => rest_url( 'my-catalog/v1/product-table' ),
-			'baseCategory' => sanitize_text_field( $atts['category'] ),
-			'baseTag'      => sanitize_text_field( $atts['tag'] ),
+			'baseCategory' => sanitize_text_field( $category ),
+			'baseTag'      => sanitize_text_field( $tag ),
 			'columns'      => $columns,
-			'pageLength'   => max( 1, absint( $atts['limit'] ) ),
-			'search'       => filter_var( $atts['search'], FILTER_VALIDATE_BOOLEAN ),
+			'pageLength'   => max( 1, absint( $limit ) ),
+			'search'       => $search,
 			'defaultOrder' => $this->get_default_order_for_columns( $columns ),
 		);
 
@@ -304,7 +296,7 @@ class My_Catalog_Product_Table {
 					<tbody>
 						<tr>
 							<td colspan="<?php echo esc_attr( count( $columns ) ); ?>">
-								<?php echo esc_html( $atts['empty_message'] ); ?>
+								<?php echo esc_html( $empty_message ); ?>
 							</td>
 						</tr>
 					</tbody>
@@ -317,67 +309,25 @@ class My_Catalog_Product_Table {
 	}
 
 	/**
-	 * Renders the product filters shortcode.
-	 *
-	 * @param array<string, mixed> $atts Shortcode attributes.
-	 * @return string
-	 */
-	public function render_filters_shortcode( $atts ) {
-		$atts = shortcode_atts(
-			array(
-				'target'        => '',
-				'show_category' => 'true',
-				'show_price'    => 'true',
-			),
-			$atts,
-			'product_filters'
-		);
-
-		wp_enqueue_style( 'my-catalog-product-table' );
-		wp_enqueue_script( 'my-catalog-product-table' );
-
-		return $this->render_filter_controls(
-			array(
-				'target'        => sanitize_html_class( $atts['target'] ),
-				'show_category' => filter_var( $atts['show_category'], FILTER_VALIDATE_BOOLEAN ),
-				'show_price'    => filter_var( $atts['show_price'], FILTER_VALIDATE_BOOLEAN ),
-				'external'      => true,
-			)
-		);
-	}
-
-	/**
-	 * Renders the product table block.
-	 *
-	 * @param array<string, mixed> $attributes Block attributes.
-	 * @return string
-	 */
-	public function render_table_block( $attributes ) {
-		return $this->render_shortcode(
-			array(
-				'limit'         => isset( $attributes['limit'] ) ? $attributes['limit'] : 10,
-				'category'      => isset( $attributes['category'] ) ? $attributes['category'] : '',
-				'tag'           => isset( $attributes['tag'] ) ? $attributes['tag'] : '',
-				'columns'       => isset( $attributes['columns'] ) ? $attributes['columns'] : '',
-				'search'        => empty( $attributes['search'] ) ? 'false' : 'true',
-				'empty_message' => isset( $attributes['emptyMessage'] ) ? $attributes['emptyMessage'] : __( 'No products found.', 'my-catalog' ),
-				'table_id'      => isset( $attributes['tableId'] ) ? $attributes['tableId'] : '',
-			)
-		);
-	}
-
-	/**
 	 * Renders the product filters block.
 	 *
 	 * @param array<string, mixed> $attributes Block attributes.
 	 * @return string
 	 */
 	public function render_filters_block( $attributes ) {
-		return $this->render_filters_shortcode(
+		$target        = isset( $attributes['target'] ) ? $attributes['target'] : '';
+		$show_category = ! empty( $attributes['showCategory'] );
+		$show_price    = ! empty( $attributes['showPrice'] );
+
+		wp_enqueue_style( 'my-catalog-product-table' );
+		wp_enqueue_script( 'my-catalog-product-table' );
+
+		return $this->render_filter_controls(
 			array(
-				'target'        => isset( $attributes['target'] ) ? $attributes['target'] : '',
-				'show_category' => empty( $attributes['showCategory'] ) ? 'false' : 'true',
-				'show_price'    => empty( $attributes['showPrice'] ) ? 'false' : 'true',
+				'target'        => sanitize_html_class( $target ),
+				'show_category' => $show_category,
+				'show_price'    => $show_price,
+				'external'      => true,
 			)
 		);
 	}
@@ -705,7 +655,7 @@ class My_Catalog_Product_Table {
 	}
 
 	/**
-	 * Builds a tax query from base shortcode filters and active UI filters.
+	 * Builds a tax query from base block filters and active UI filters.
 	 *
 	 * @param string $base_category Base category filter.
 	 * @param string $base_tag      Base tag filter.
@@ -913,7 +863,7 @@ class My_Catalog_Product_Table {
 	}
 
 	/**
-	 * Parses columns from shortcode attributes.
+	 * Parses columns from block attributes.
 	 *
 	 * @param string $columns Columns list.
 	 * @return array<int, string>

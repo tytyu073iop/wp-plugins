@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       My Catalog
  * Plugin URI:        https://example.com/my-catalog
- * Description:       Catalog features for custom products and news, including a product table shortcode and news carousel block.
+ * Description:       Catalog features for custom products and news, including a product table block and news carousel block.
  * Version:           0.2.0
  * Requires at least: 6.5
  * Requires PHP:      7.4
