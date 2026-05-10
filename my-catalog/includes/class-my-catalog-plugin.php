@@ -81,8 +81,9 @@ final class My_Catalog_Plugin {
 	 * @return void
 	 */
 	public function register_block() {
-		$block_dir         = MY_CATALOG_PATH;
+		$block_dir          = MY_CATALOG_PATH;
 		$product_filter_dir = MY_CATALOG_PATH . 'blocks/product-filters';
+		$product_table_dir  = MY_CATALOG_PATH . 'blocks/product-table';
 
 		if ( file_exists( $block_dir . '/block.json' ) ) {
 			register_block_type(
@@ -98,6 +99,15 @@ final class My_Catalog_Plugin {
 				$product_filter_dir,
 				array(
 					'render_callback' => array( $this->product_table, 'render_filters_block' ),
+				)
+			);
+		}
+
+		if ( file_exists( $product_table_dir . '/block.json' ) ) {
+			register_block_type(
+				$product_table_dir,
+				array(
+					'render_callback' => array( $this->product_table, 'render_table_block' ),
 				)
 			);
 		}

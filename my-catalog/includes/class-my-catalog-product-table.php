@@ -347,6 +347,26 @@ class My_Catalog_Product_Table {
 	}
 
 	/**
+	 * Renders the product table block.
+	 *
+	 * @param array<string, mixed> $attributes Block attributes.
+	 * @return string
+	 */
+	public function render_table_block( $attributes ) {
+		return $this->render_shortcode(
+			array(
+				'limit'         => isset( $attributes['limit'] ) ? $attributes['limit'] : 10,
+				'category'      => isset( $attributes['category'] ) ? $attributes['category'] : '',
+				'tag'           => isset( $attributes['tag'] ) ? $attributes['tag'] : '',
+				'columns'       => isset( $attributes['columns'] ) ? $attributes['columns'] : '',
+				'search'        => empty( $attributes['search'] ) ? 'false' : 'true',
+				'empty_message' => isset( $attributes['emptyMessage'] ) ? $attributes['emptyMessage'] : __( 'No products found.', 'my-catalog' ),
+				'table_id'      => isset( $attributes['tableId'] ) ? $attributes['tableId'] : '',
+			)
+		);
+	}
+
+	/**
 	 * Renders the product filters block.
 	 *
 	 * @param array<string, mixed> $attributes Block attributes.

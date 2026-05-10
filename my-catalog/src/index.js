@@ -1,5 +1,5 @@
 import { registerBlockType } from '@wordpress/blocks';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import {
 	PanelBody,
@@ -17,6 +17,7 @@ import { useInstanceId } from '@wordpress/compose';
 
 import metadata from '../block.json';
 import productFiltersMetadata from '../blocks/product-filters/block.json';
+import productTableMetadata from '../blocks/product-table/block.json';
 
 import './editor.scss';
 import './style.scss';
@@ -408,8 +409,267 @@ function ProductFiltersEdit( { attributes, setAttributes } ) {
 	);
 }
 
+function ProductTableEdit( { attributes, setAttributes } ) {
+	const { limit, category, tag, columns, search, emptyMessage, tableId } =
+		attributes;
+	const blockProps = useBlockProps( {
+		className: 'wp-block-my-catalog-product-table',
+	} );
+
+	const categories = useSelect(
+		( select ) =>
+			select( 'core' ).getEntityRecords( 'taxonomy', 'product_cat', {
+				per_page: -1,
+				hide_empty: false,
+			} ),
+		[]
+	);
+	const categoryOptions = [
+		{ label: __( 'All categories', 'my-catalog' ), value: '' },
+		...( categories || [] ).map( ( term ) => ( {
+			label: term.name,
+			value: term.slug,
+		} ) ),
+	];
+
+	const [ tableData, setTableData ] = useState( null );
+	const [ isLoading, setIsLoading ] = useState( true );
+
+	useEffect( () => {
+		setIsLoading( true );
+		const parsedColumns = columns
+			? columns.split( ',' ).map( ( c ) => c.trim() )
+			: [];
+		apiFetch( {
+			path: addQueryArgs( '/my-catalog/v1/product-table', {
+				length: Math.min( limit, 5 ),
+				start: 0,
+				draw: 1,
+				...( parsedColumns.length > 0 && {
+					columns: parsedColumns,
+				} ),
+				...( category && { base_category: category } ),
+				...( tag && { base_tag: tag } ),
+			} ),
+		} )
+			.then( ( data ) => {
+				setTableData( data );
+				setIsLoading( false );
+			} )
+			.catch( () => {
+				setTableData( { data: [], recordsTotal: 0 } );
+				setIsLoading( false );
+			} );
+	}, [ limit, category, tag, columns ] );
+
+	const columnLabels = {
+		image: __( 'Image', 'my-catalog' ),
+		title: __( 'Name', 'my-catalog' ),
+		price: __( 'Price', 'my-catalog' ),
+		category: __( 'Category', 'my-catalog' ),
+		attributes: __( 'Attributes', 'my-catalog' ),
+		sku: __( 'SKU', 'my-catalog' ),
+		stock: __( 'Availability', 'my-catalog' ),
+		weight: __( 'Weight', 'my-catalog' ),
+		external: __( 'Buy', 'my-catalog' ),
+	};
+
+	const parsedColumns = columns
+		? columns.split( ',' ).map( ( c ) => c.trim() )
+		: [];
+	const activeColumns =
+		parsedColumns.length > 0
+			? parsedColumns
+			: [ 'image', 'title', 'price', 'category', 'sku' ];
+
+	let previewContent;
+	if ( isLoading ) {
+		previewContent = (
+			<div className="my-catalog-product-table my-catalog-product-table--loading">
+				<div className="my-catalog-product-table__frame">
+					<div className="my-catalog-news-carousel__control-state">
+						<Spinner />
+					</div>
+				</div>
+			</div>
+		);
+	} else if (
+		! tableData ||
+		! tableData.data ||
+		tableData.data.length === 0
+	) {
+		previewContent = (
+			<div className="my-catalog-product-table my-catalog-product-table--empty">
+				<div className="my-catalog-product-table__frame">
+					<table
+						className="display responsive nowrap dataTable"
+						style={ { width: '100%' } }
+					>
+						<thead>
+							<tr>
+								{ activeColumns.map( ( key ) => (
+									<th key={ key }>
+										{ columnLabels[ key ] || key }
+									</th>
+								) ) }
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td colSpan={ activeColumns.length }>
+									{ emptyMessage }
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		);
+	} else {
+		previewContent = (
+			<div className="my-catalog-product-table">
+				<div className="my-catalog-product-table__frame">
+					<table
+						className="display responsive nowrap dataTable"
+						style={ { width: '100%' } }
+					>
+						<thead>
+							<tr>
+								{ activeColumns.map( ( key ) => (
+									<th key={ key }>
+										{ columnLabels[ key ] || key }
+									</th>
+								) ) }
+							</tr>
+						</thead>
+						<tbody>
+							{ tableData.data.map( ( row, index ) => (
+								<tr key={ index }>
+									{ activeColumns.map( ( key ) => (
+										<td
+											key={ key }
+											dangerouslySetInnerHTML={ {
+												__html: row[ key ] || '&mdash;',
+											} }
+										/>
+									) ) }
+								</tr>
+							) ) }
+						</tbody>
+						{ tableData.recordsTotal > tableData.data.length && (
+							<tfoot>
+								<tr>
+									<td colSpan={ activeColumns.length }>
+										{ sprintf(
+											/* translators: %d: number of additional products */
+											__(
+												'… and %d more products',
+												'my-catalog'
+											),
+											tableData.recordsTotal -
+												tableData.data.length
+										) }
+									</td>
+								</tr>
+							</tfoot>
+						) }
+					</table>
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody
+					title={ __( 'Product table settings', 'my-catalog' ) }
+				>
+					<RangeControl
+						label={ __( 'Products per page', 'my-catalog' ) }
+						value={ limit }
+						onChange={ ( nextValue ) =>
+							setAttributes( { limit: nextValue || 1 } )
+						}
+						min={ 1 }
+						max={ 100 }
+					/>
+					{ categories === null ? (
+						<div className="my-catalog-news-carousel__control-state">
+							<Spinner />
+						</div>
+					) : (
+						<SelectControl
+							label={ __( 'Category filter', 'my-catalog' ) }
+							value={ category }
+							options={ categoryOptions }
+							onChange={ ( nextValue ) =>
+								setAttributes( { category: nextValue } )
+							}
+						/>
+					) }
+					<TextControl
+						label={ __( 'Tag filter', 'my-catalog' ) }
+						value={ tag }
+						onChange={ ( nextValue ) =>
+							setAttributes( { tag: nextValue } )
+						}
+					/>
+					<TextControl
+						label={ __(
+							'Columns (comma-separated)',
+							'my-catalog'
+						) }
+						value={ columns }
+						onChange={ ( nextValue ) =>
+							setAttributes( { columns: nextValue } )
+						}
+						help={ __(
+							'Leave empty to use defaults from Settings > My Catalog. Options: image, title, price, category, attributes, sku, stock, weight, external.',
+							'my-catalog'
+						) }
+					/>
+					<ToggleControl
+						label={ __( 'Show search', 'my-catalog' ) }
+						checked={ search }
+						onChange={ ( nextValue ) =>
+							setAttributes( { search: nextValue } )
+						}
+					/>
+					<TextControl
+						label={ __( 'Empty message', 'my-catalog' ) }
+						value={ emptyMessage }
+						onChange={ ( nextValue ) =>
+							setAttributes( { emptyMessage: nextValue } )
+						}
+					/>
+					<TextControl
+						label={ __( 'Table ID', 'my-catalog' ) }
+						value={ tableId }
+						onChange={ ( nextValue ) =>
+							setAttributes( { tableId: nextValue } )
+						}
+						help={ __(
+							'Optional CSS ID for targeting with filters.',
+							'my-catalog'
+						) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>{ previewContent }</div>
+		</>
+	);
+}
+
 registerBlockType( metadata.name, {
 	edit: NewsCarouselEdit,
+	save() {
+		return null;
+	},
+} );
+
+registerBlockType( productTableMetadata.name, {
+	edit: ProductTableEdit,
 	save() {
 		return null;
 	},

@@ -134,3 +134,17 @@
 			);
 	}
 }
+
+.wp-block-my-catalog-product-table {
+
+	.my-catalog-product-table--loading,
+	.my-catalog-product-table--empty {
+
+		.my-catalog-product-table__frame {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			min-height: 100px;
+		}
+	}
+}
