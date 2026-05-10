@@ -1,0 +1,47 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "my-catalog/product-table",
+	"version": "0.1.0",
+	"title": "Product Table",
+	"category": "widgets",
+	"icon": "list-view",
+	"description": "Display a searchable, sortable table of products.",
+	"textdomain": "my-catalog",
+	"editorScript": "file:../../build/index.js",
+	"editorStyle": "file:../../build/index.css",
+	"style": "file:../../build/style-index.css",
+	"supports": {
+		"html": false
+	},
+	"attributes": {
+		"limit": {
+			"type": "number",
+			"default": 10
+		},
+		"category": {
+			"type": "string",
+			"default": ""
+		},
+		"tag": {
+			"type": "string",
+			"default": ""
+		},
+		"columns": {
+			"type": "string",
+			"default": ""
+		},
+		"search": {
+			"type": "boolean",
+			"default": true
+		},
+		"emptyMessage": {
+			"type": "string",
+			"default": "No products found."
+		},
+		"tableId": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}

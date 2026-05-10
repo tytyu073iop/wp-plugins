@@ -229,6 +229,25 @@ class My_Catalog_Product_Table {
 				'permission_callback' => '__return_true',
 			)
 		);
+
+		register_rest_route(
+			'my-catalog/v1',
+			'/price-bounds',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'handle_price_bounds_request' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+
+	/**
+	 * Returns min and max product prices for the price range filter.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function handle_price_bounds_request() {
+		return rest_ensure_response( $this->get_price_filter_bounds() );
 	}
 
 	/**
@@ -323,6 +342,26 @@ class My_Catalog_Product_Table {
 				'show_category' => filter_var( $atts['show_category'], FILTER_VALIDATE_BOOLEAN ),
 				'show_price'    => filter_var( $atts['show_price'], FILTER_VALIDATE_BOOLEAN ),
 				'external'      => true,
+			)
+		);
+	}
+
+	/**
+	 * Renders the product table block.
+	 *
+	 * @param array<string, mixed> $attributes Block attributes.
+	 * @return string
+	 */
+	public function render_table_block( $attributes ) {
+		return $this->render_shortcode(
+			array(
+				'limit'         => isset( $attributes['limit'] ) ? $attributes['limit'] : 10,
+				'category'      => isset( $attributes['category'] ) ? $attributes['category'] : '',
+				'tag'           => isset( $attributes['tag'] ) ? $attributes['tag'] : '',
+				'columns'       => isset( $attributes['columns'] ) ? $attributes['columns'] : '',
+				'search'        => empty( $attributes['search'] ) ? 'false' : 'true',
+				'empty_message' => isset( $attributes['emptyMessage'] ) ? $attributes['emptyMessage'] : __( 'No products found.', 'my-catalog' ),
+				'table_id'      => isset( $attributes['tableId'] ) ? $attributes['tableId'] : '',
 			)
 		);
 	}

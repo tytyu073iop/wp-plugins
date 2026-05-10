@@ -179,6 +179,20 @@ class My_Catalog_Core {
 				'rewrite'           => array( 'slug' => 'news-category' ),
 			)
 		);
+
+		register_post_meta(
+			self::NEWS_POST_TYPE,
+			'_my_catalog_read_more_url',
+			array(
+				'type'          => 'string',
+				'description'   => 'Custom read more URL for news items.',
+				'single'        => true,
+				'show_in_rest'  => true,
+				'auth_callback' => function () {
+					return current_user_can( 'edit_posts' );
+				},
+			)
+		);
 	}
 
 	/**

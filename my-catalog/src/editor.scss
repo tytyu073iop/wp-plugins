@@ -11,3 +11,140 @@
 	justify-content: center;
 	min-height: 40px;
 }
+
+.wp-block-my-catalog-product-filters {
+	.my-catalog-product-table__filters {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.my-catalog-product-filters {
+		margin: 2rem 0 1rem;
+	}
+
+	.my-catalog-product-table__filter {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		min-width: 180px;
+		font-size: 0.95rem;
+
+		select,
+		input {
+			min-height: 42px;
+			padding: 0.55rem 0.75rem;
+			border: 1px solid #ccd0d4;
+			border-radius: 4px;
+			background: #fff;
+		}
+	}
+
+	.my-catalog-product-table__filter--price-range {
+		gap: 0.65rem;
+	}
+
+	.my-catalog-product-table__price-fields {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.75rem;
+	}
+
+	.my-catalog-product-table__price-field {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.my-catalog-product-table__price-label {
+		font-size: 0.8rem;
+		color: #50575e;
+	}
+
+	.my-catalog-product-table__range-slider {
+		position: relative;
+		height: 28px;
+		margin-top: 0.2rem;
+
+		input[type='range'] {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			min-height: 28px;
+			padding: 0;
+			border: 0;
+			background: transparent;
+			pointer-events: none;
+			appearance: none;
+
+			&::-webkit-slider-runnable-track {
+				height: 6px;
+				background: transparent;
+			}
+
+			&::-moz-range-track {
+				height: 6px;
+				background: transparent;
+			}
+
+			&::-webkit-slider-thumb {
+				width: 20px;
+				height: 20px;
+				margin-top: -7px;
+				border: 2px solid #2271b1;
+				border-radius: 50%;
+				background: #fff;
+				box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
+				cursor: pointer;
+				pointer-events: auto;
+				appearance: none;
+			}
+
+			&::-moz-range-thumb {
+				width: 20px;
+				height: 20px;
+				border: 2px solid #2271b1;
+				border-radius: 50%;
+				background: #fff;
+				box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
+				cursor: pointer;
+				pointer-events: auto;
+			}
+		}
+	}
+
+	.my-catalog-product-table__range-track {
+		position: absolute;
+		top: 11px;
+		right: 0;
+		left: 0;
+		height: 6px;
+		border-radius: 999px;
+		background:
+			linear-gradient(
+				to right,
+				#dcdcde 0,
+				#dcdcde var(--range-left, 0%),
+				#2271b1 var(--range-left, 0%),
+				#2271b1 calc(100% - var(--range-right, 0%)),
+				#dcdcde calc(100% - var(--range-right, 0%)),
+				#dcdcde 100%
+			);
+	}
+}
+
+.wp-block-my-catalog-product-table {
+
+	.my-catalog-product-table--loading,
+	.my-catalog-product-table--empty {
+
+		.my-catalog-product-table__frame {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			min-height: 100px;
+		}
+	}
+}
